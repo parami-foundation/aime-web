@@ -61,7 +61,7 @@ export const getChatHistory = async (token: string, characterId: string) => {
 }
 
 export const getAutoQuestion = async (token: string, charaterName: string) => {
-  const resp = await fetch(`${PARAMI_AI}/generate_question?charater_name=${charaterName}`, {
+  const resp = await fetch(`${PARAMI_AI}/generate_question?character_name=${charaterName}`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }

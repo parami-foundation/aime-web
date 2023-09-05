@@ -47,7 +47,7 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
             }
             return null;
         }).then(res => {
-            if (res) {
+            if (res && typeof res === 'string') {
                 setAutoQuestion(res);
             }
         }).catch(e => {
@@ -327,6 +327,7 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                         handleSendMessage(inputValue);
                     } else if (autoQuestion) {
                         handleSendMessage(autoQuestion);
+                        setAutoQuestion('');
                         genAutoQuestion();
                     }
                     setInputValue('');
