@@ -26,10 +26,47 @@
 
   .avatar-section {
     .avatar-container {
+      position: relative;
+
       img {
         border-radius: 30px;
         width: 327px;
         height: 327px;
+      }
+
+      .power-balance {
+        width: 108px;
+        height: 24px;
+        position: absolute;
+        display: flex;
+        top: 15px;
+        right: 15px;
+        align-items: center;
+        color: #ffffff;
+        background: rgba($color: #000000, $alpha: 0.2);
+        border-radius: 12px;
+        padding: 0 4px;
+
+        .power-icon-container {
+          height: 16px;
+          width: 16px;
+          margin-right: 6px;
+
+          img {
+            height: 100%;
+            width: 100%;
+          }
+        }
+
+        .balance {
+          flex-grow: 1;
+        }
+
+        .caret-icon {
+          width: 6px;
+          height: fit-content;
+          margin-right: 4px;
+        }
       }
     }
 
@@ -114,5 +151,25 @@
 
   .audio-container {
     display: none;
+  }
+}
+
+.dropdown-menu {
+  background: #ffffff;
+  padding: 10px;
+  border-radius: 10px;
+
+  .menu-item {
+    display: flex;
+    align-items: flex-end;
+    font-size: 12px;
+
+    & + .menu-item {
+      margin-top: 10px;
+    }
+
+    img {
+      margin-right: 5px;
+    }
   }
 }

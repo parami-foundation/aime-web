@@ -6,6 +6,7 @@ import { Character, characters } from '../../models/character';
 import { getAutoQuestion, getChatHistory } from '../../services/ai.service';
 import { useAuth } from '@clerk/clerk-react';
 import { WS_Endpoint } from '../../models/aime';
+import { Dropdown } from 'antd';
 
 export interface ChatbotProps {
     character: Character;
@@ -37,6 +38,7 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
     const [messages, setMessages] = useState<MessageDisplay[]>([]);
     const [inputValue, setInputValue] = useState<string>();
     const { getToken } = useAuth();
+    const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
     useEffect(() => {
         getToken().then(token => {
@@ -98,7 +100,6 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
 
         socket.onopen = (event) => {
             console.log("successfully connected");
-            // socket.send("web"); // select web as the platform
         };
 
         socket.onmessage = (event) => {
@@ -224,6 +225,43 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
             <div className='avatar-section'>
                 <div className='avatar-container'>
                     <img src={character.avatar} alt=''></img>
+
+                    <Dropdown menu={{ items: [] }} placement="bottomRight"
+                        onOpenChange={(open) => {
+                            setMenuOpen(open);
+                        }}
+                        dropdownRender={(menu) => {
+                            return <>
+                                <div className='dropdown-menu'>
+                                    <div className='menu-item'>
+                                        <img src='/images/list_icon.svg' alt=''></img>
+                                        <span>List of AIMEs</span>
+                                    </div>
+                                    <div className='menu-item'>
+                                        <img src='/images/buy_power_icon.svg' alt=''></img>
+                                        <span>Buy Powers</span>
+                                    </div>
+                                    <div className='menu-item'>
+                                        <img src='/images/tips_icon.svg' alt=''></img>
+                                        <span>AIME Tips</span>
+                                    </div>
+                                    <div className='menu-item'>
+                                        <img src='/images/reward_icon.svg' alt=''></img>
+                                        <span>My Rewards</span>
+                                    </div>
+                                </div>
+                            </>
+                        }}>
+                        <div className='power-balance'>
+                            <div className='power-icon-container'>
+                                <img src='/images/power_icon.svg' alt=''></img>
+                            </div>
+                            <span className='balance'>0 Power</span>
+                            {menuOpen && <img className='caret-icon' src='/images/caret_up.svg' alt=''></img>}
+                            {!menuOpen && <img className='caret-icon' src='/images/caret_down.svg' alt=''></img>}
+                        </div>
+                    </Dropdown>
+
                 </div>
 
                 <div className='name'>
