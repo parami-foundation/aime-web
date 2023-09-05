@@ -69,7 +69,7 @@ function AIME({ }: AIMEProps) {
             {!isSignedIn && <>
                 <div className='logo-container'>
                     <div className='logo'>
-                        {/* <img src='/images/aime_logo.svg' alt='' /> */}
+                        <img src='/logo.png' alt='' />
                     </div>
                     <div className='title'>AIME</div>
                     <div className='sub-title'>aime.parami.io</div>
@@ -125,6 +125,14 @@ function AIME({ }: AIMEProps) {
                             <div className='btn-large' onClick={() => {
                             }}>Mint My Own AIME</div>
                         </div>
+
+                        {process.env.NODE_ENV === 'development' && <>
+                            <div className='button-container'>
+                                <div className='btn-large' onClick={() => {
+                                    signOut();
+                                }}>Logout</div>
+                            </div>
+                        </>}
                     </div>
                 </>}
 
