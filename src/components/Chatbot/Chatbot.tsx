@@ -40,7 +40,7 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
     const { getToken } = useAuth();
     const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
-    useEffect(() => {
+    const genAutoQuestion = () => {
         getToken().then(token => {
             if (token) {
                 return getAutoQuestion(token, character.name)
@@ -53,6 +53,10 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
         }).catch(e => {
             console.log('auto gen question error', e);
         })
+    }
+
+    useEffect(() => {
+        genAutoQuestion();
     }, []);
 
     const scrollDown = () => {
@@ -313,13 +317,18 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
             <div className='input-container'>
                 <input
                     value={inputValue}
-                    placeholder='say something...'
+                    placeholder={autoQuestion ? `"${autoQuestion}"` : 'Ask me anything...'}
                     onChange={(event) => {
                         setInputValue(event.target.value);
                     }}
                 ></input>
                 <div className='enter-btn' onClick={() => {
-                    handleSendMessage(inputValue ?? '');
+                    if (inputValue) {
+                        handleSendMessage(inputValue);
+                    } else if (autoQuestion) {
+                        handleSendMessage(autoQuestion);
+                        genAutoQuestion();
+                    }
                     setInputValue('');
                 }}>
                     <img src='./images/enter_icon.svg' alt=''></img>
