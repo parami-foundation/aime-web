@@ -22,39 +22,25 @@ export interface WithdrawSignature {
   sig: string;
 }
 
+const avatars = {
+  'elon_musk': './images/elon_avatar.jpg',
+  'SBF': './images/sbf_avatar.png',
+  'CZ': './images/cz_avatar.png',
+  'justin_sun': './images/sun_avatar.png'
+} as { [key: string]: string };
+
 export const getCharaters = async () => {
   const resp = await fetch(`${PARAMI_AI}/characters`);
-  const characters = await resp.json();
-  console.log('Charaters', characters);
-
-  // mock
-  return [
-    {
-      name: 'Elon Musk',
-      character_id: 'elon_musk',
-      avatar: './images/elon_avatar.jpg',
-    },
-    {
-      name: 'SBF',
-      character_id: 'sbf',
-      avatar: './images/sbf_avatar.png'
-    },
-    {
-      name: 'CZ',
-      character_id: 'cz',
-      avatar: './images/cz_avatar.png'
-    },
-    {
-      name: 'Justin Sun',
-      character_id: 'justin_sum',
-      avatar: './images/sun_avatar.png'
+  const characters = await resp.json() as Character[];
+  return characters.map(char => {
+    return {
+      ...char,
+      avatar: avatars[char.character_id] ?? ''
     }
-  ] as Character[];
-  
-  // return characters as Character[];
+  })
 }
 
-export const queryCharacter = async (query: {avatar_url?: string, twitter_handle?: string}) => {
+export const queryCharacter = async (query: { avatar_url?: string, twitter_handle?: string }) => {
   if (!query || (!query.avatar_url && !query.twitter_handle)) {
     return null;
   }

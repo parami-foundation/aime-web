@@ -12,8 +12,6 @@ import { BIND_WALLET_MESSAGE } from '../../models/aime';
 
 export interface AIMEProps { }
 
-const availableCharaterIds = ['elon_musk', 'justin_sum'];
-
 function AIME({ }: AIMEProps) {
     let { handle } = useParams() as { handle: string };
     const [character, setCharacter] = useState<Character>();
@@ -50,7 +48,7 @@ function AIME({ }: AIMEProps) {
         getCharaters().then(characters => {
             setCharacters(characters)
         })
-    }, [])
+    }, []);
 
     useEffect(() => {
         if (handle) {

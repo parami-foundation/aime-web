@@ -5,21 +5,25 @@ import { useRef } from 'react';
 import { Character, characters } from '../../models/character';
 import { getAutoQuestion, getChatHistory } from '../../services/ai.service';
 import { useAuth } from '@clerk/clerk-react';
+import { WS_Endpoint } from '../../models/aime';
 
 export interface ChatbotProps {
     character: Character;
     onReturn: () => void;
 }
 
-// todo: change this
-const GREETING = 'Hi, my friend, what brings you here today?';
+enum MessageType {
+    MESSAGE = 'message',
+    SCORE = 'score'
+}
 
-// todo: remove mock message
-const MOCK_FIRST_MSG = 'Who are you?';
+interface MessageDisplay {
+    type: MessageType;
+    sender: string;
+    content: string;
+}
 
 let socket: WebSocket;
-
-let wsEndpoint = 'ai.parami.io';
 
 function Chatbot({ character, onReturn }: ChatbotProps) {
     // const [audioEnabled, setAudioEnabled] = useState<boolean>(false);
@@ -29,8 +33,8 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
     const msgList = useRef<HTMLDivElement>(null);
 
     const [autoQuestion, setAutoQuestion] = useState<string>();
-    const [historyMessages, setHistoryMessages] = useState<{ name: string, msg: string }[]>([]);
-    const [messages, setMessages] = useState<{ name: string, msg: string }[]>([]);
+    const [emoScore, setEmoScore] = useState<number>();
+    const [messages, setMessages] = useState<MessageDisplay[]>([]);
     const [inputValue, setInputValue] = useState<string>();
     const { getToken } = useAuth();
 
@@ -60,18 +64,35 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
             return [
                 ...prevMessages,
                 {
-                    name: character.name,
-                    msg: msg
+                    type: MessageType.MESSAGE,
+                    sender: character.name,
+                    content: msg
                 }
             ];
         })
+    }
+
+    const updateCurrentScore = (score?: number) => {
+        if (score !== undefined) {
+            setMessages(prevMessages => {
+                return [
+                    ...prevMessages,
+                    {
+                        type: MessageType.SCORE,
+                        sender: character.name,
+                        content: score.toString()
+                    }
+                ];
+            })
+            // setEmoScore(undefined);
+        }
     }
 
     const connectSocket = (authToken: string) => {
         const clientId = Math.floor(Math.random() * 1010000);
         // var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
         const ws_scheme = "wss";
-        const ws_path = `${ws_scheme}://${wsEndpoint}/ws/${clientId}?token=${authToken}&character_id=${character.character_id}&platform=web`;
+        const ws_path = `${ws_scheme}://${WS_Endpoint}/ws/${clientId}?token=${authToken}&character_id=${character.character_id}&platform=web`;
         socket = new WebSocket(ws_path);
         socket.binaryType = 'arraybuffer';
 
@@ -86,14 +107,14 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                 const message = event.data;
                 const aiMessage = JSON.parse(message) as { type: string, data: string };
                 console.log('[aiMessage]', aiMessage);
-
                 if (aiMessage.type === 'text') {
                     handleAiMessage(aiMessage.data);
                 } else if (aiMessage.type === 'score') {
                     // set current score
+                    setEmoScore(Number(aiMessage.data));
                 } else if (aiMessage.type === 'end') {
                     // handle end
-                    // display current score
+                    updateCurrentScore(emoScore);
                 }
             } else {  // audio binary data
                 console.log('[binary data]', event.data);
@@ -119,15 +140,17 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
 
                 getChatHistory(authToken, character.character_id).then(res => {
                     if (res?.length) {
-                        const messages = [] as { name: string, msg: string }[];
+                        const messages = [] as MessageDisplay[];
                         res.forEach(chat => {
                             messages.push({
-                                name: 'User',
-                                msg: chat.client_message_unicode
+                                type: MessageType.MESSAGE,
+                                sender: 'User',
+                                content: chat.client_message_unicode
                             });
                             messages.push({
-                                name: character.name,
-                                msg: chat.server_message_unicode
+                                type: MessageType.MESSAGE,
+                                sender: character.name,
+                                content: chat.server_message_unicode
                             });
                         })
                         setMessages(messages);
@@ -171,8 +194,9 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
             setMessages([
                 ...messages,
                 {
-                    name: 'User',
-                    msg: text
+                    type: MessageType.MESSAGE,
+                    sender: 'User',
+                    content: text
                 }
             ]);
             socket.send(text);
@@ -212,10 +236,16 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                 <div className='messages'>
                     {messages.map(message => {
                         return <>
-                            <div className='message'>
-                                <div className='name'>{message.name}:</div>
-                                <div className='msg'>{message.msg}</div>
-                            </div>
+                            {message.type === MessageType.MESSAGE && <>
+                                <div className='message'>
+                                    <div className='name'>{message.sender}:</div>
+                                    <div className='msg'>{message.content}</div>
+                                </div>
+                            </>}
+
+                            {message.type === MessageType.SCORE && <>
+                                <div className='emo-score'>({message.content})</div>
+                            </>}
                         </>
                     })}
                 </div>
