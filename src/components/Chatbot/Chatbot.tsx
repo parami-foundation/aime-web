@@ -34,7 +34,6 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
     const msgList = useRef<HTMLDivElement>(null);
 
     const [autoQuestion, setAutoQuestion] = useState<string>();
-    const [emoScore, setEmoScore] = useState<number>();
     const [messages, setMessages] = useState<MessageDisplay[]>([]);
     const [inputValue, setInputValue] = useState<string>();
     const { getToken } = useAuth();
@@ -74,7 +73,7 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
         })
     }
 
-    const updateCurrentScore = (score?: number) => {
+    const handleScore = (score?: number) => {
         if (score !== undefined) {
             setMessages(prevMessages => {
                 return [
@@ -86,7 +85,6 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                     }
                 ];
             })
-            // setEmoScore(undefined);
         }
     }
 
@@ -112,10 +110,10 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                     handleAiMessage(aiMessage.data);
                 } else if (aiMessage.type === 'score') {
                     // set current score
-                    setEmoScore(Number(aiMessage.data));
+                    handleScore(Number(aiMessage.data));
                 } else if (aiMessage.type === 'end') {
                     // handle end
-                    updateCurrentScore(emoScore);
+                    // updateCurrentScore(emoScore);
                 }
             } else {  // audio binary data
                 console.log('[binary data]', event.data);
