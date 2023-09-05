@@ -17,12 +17,9 @@ const availableCharaterIds = ['elon_musk', 'justin_sum'];
 function AIME({ }: AIMEProps) {
     let { handle } = useParams() as { handle: string };
     const [character, setCharacter] = useState<Character>();
-    const [authToken, setAuthToken] = useState<string>();
-    const { getToken } = useAuth();
     const { isSignedIn } = useUser();
     const { signOut, openSignIn } = useClerk();
     const [characters, setCharacters] = useState<Character[]>();
-    const [showBindWalletBtn, setShowBindWalletBtn] = useState<boolean>(true);
     const [requestUserSig, setRequestUserSig] = useState<boolean>(false);
     const { open } = useWeb3Modal();
     const { data: signature, error: signMsgError, isLoading: signMsgLoading, signMessage } = useSignMessage();
@@ -45,29 +42,13 @@ function AIME({ }: AIMEProps) {
             notification.success({
                 message: 'bind wallet success'
             })
-            setShowBindWalletBtn(false);
             setRequestUserSig(false);
         }
     }, [signature])
 
-    // useEffect(() => {
-    //     if (isSignedIn) {
-    //         // todo: get token
-    //         // getToken().then(token => {
-    //         //     if (token) {
-    //         //         console.log('token from clerk:', token)
-    //         //         setAuthToken(token);
-    //         //     }
-    //         // })
-    //     }
-    // }, [isSignedIn])
-
     useEffect(() => {
         getCharaters().then(characters => {
             setCharacters(characters)
-            // setCharacters(characters.filter(char => {
-            //     return availableCharaterIds.includes(char.character_id)
-            // }))
         })
     }, [])
 
@@ -156,24 +137,6 @@ function AIME({ }: AIMEProps) {
                         }}></Chatbot>
                     </div>
                 </>}
-
-                {/* {character && authToken && <>
-                    
-                </>} */}
-
-                {/* {showBindWalletBtn && <>
-                    <div style={{ marginBottom: '20px' }}>
-                        <Button type='primary' onClick={() => {
-                            setRequestUserSig(true);
-                        }}>Bind Wallet</Button>
-                    </div>
-                </>}
-
-                <div>
-                    <Button type='primary' onClick={() => {
-                        signOut();
-                    }}>Sign out</Button>
-                </div> */}
             </>}
         </div>
     </>;

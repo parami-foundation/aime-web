@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import './Chatbot.scss';
 import { useRef } from 'react';
 import { Character, characters } from '../../models/character';
-import { getChatHistory } from '../../services/ai.service';
+import { getAutoQuestion, getChatHistory } from '../../services/ai.service';
 import { useAuth } from '@clerk/clerk-react';
 
 export interface ChatbotProps {
@@ -21,68 +21,32 @@ let socket: WebSocket;
 
 let wsEndpoint = 'ai.parami.io';
 
-const endMarkerPattern = /\[end(?:=[^\]]*)?\]/;
-
-const isMessageEnd = (msg: string) => {
-    return msg && endMarkerPattern.test(msg);
-}
-
-const removeEndMarker = (msg: string) => {
-    return msg.replace(endMarkerPattern, '');
-}
-
-const mockMessages = [{
-    name: 'SBF',
-    msg: `Hi, my friend, what brings you here today?`
-}, {
-    name: 'User',
-    msg: `Couldn't be better man!`
-}, {
-    name: 'SBF',
-    msg: `You just need to continue chatting with me and I will give you more surprises.`
-}, {
-    name: 'User',
-    msg: `Couldn't be better man!`
-}, {
-    name: 'SBF',
-    msg: `Remember to come chat with me again tomorrow, I will give you more surprises, night. 👋😴`
-}, {
-    name: 'User',
-    msg: `Couldn't be better man!`
-}, {
-    name: 'SBF',
-    msg: `Purchase Successful, 10 SBF Power have placed in your wallet. 🎉🎉🎉`
-}, {
-    name: 'User',
-    msg: `Couldn't be better man!`
-}]
-
 function Chatbot({ character, onReturn }: ChatbotProps) {
-    const [audioEnabled, setAudioEnabled] = useState<boolean>(false);
+    // const [audioEnabled, setAudioEnabled] = useState<boolean>(false);
     const [audioQueue, setAudioQueue] = useState<any[]>([]);
     const [currentAudio, setCurrentAudio] = useState<any>();
     const audioPlayer = useRef<HTMLAudioElement>(null);
     const msgList = useRef<HTMLDivElement>(null);
 
+    const [autoQuestion, setAutoQuestion] = useState<string>();
     const [historyMessages, setHistoryMessages] = useState<{ name: string, msg: string }[]>([]);
-    const [messages, setMessages] = useState<{ name: string, msg: string }[]>(mockMessages);
-    const [newMessage, setNewMessage] = useState<string>('');
+    const [messages, setMessages] = useState<{ name: string, msg: string }[]>([]);
     const [inputValue, setInputValue] = useState<string>();
     const { getToken } = useAuth();
 
-    const characterInfo = characters.find(c => c.name === character.name);
-
-    const [questionOption, setQuestionOption] = useState<string>();
-
-    const pickOneQuestion = (options: string[]) => {
-        const randomIndex = Math.floor(Math.random() * options.length);
-        const option = options[randomIndex];
-        return option;
-    }
-
     useEffect(() => {
-        const question = pickOneQuestion(characterInfo?.questions ?? [`What's up?`]);
-        setQuestionOption(question);
+        getToken().then(token => {
+            if (token) {
+                return getAutoQuestion(token, character.name)
+            }
+            return null;
+        }).then(res => {
+            if (res) {
+                setAutoQuestion(res);
+            }
+        }).catch(e => {
+            console.log('auto gen question error', e);
+        })
     }, []);
 
     const scrollDown = () => {
@@ -91,26 +55,17 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
         }
     }
 
-    const handleMessageStream = (msg: string) => {
-        setNewMessage(prevMessage => prevMessage + msg);
-        scrollDown();
+    const handleAiMessage = (msg: string) => {
+        setMessages(prevMessages => {
+            return [
+                ...prevMessages,
+                {
+                    name: character.name,
+                    msg: msg
+                }
+            ];
+        })
     }
-
-    useEffect(() => {
-        if (isMessageEnd(newMessage)) {
-            const newMsg = removeEndMarker(newMessage);
-            if (newMsg) {
-                setMessages([
-                    ...messages,
-                    {
-                        name: character.name[0], // todo: config this?
-                        msg: newMsg
-                    }
-                ])
-            }
-            setNewMessage('');
-        }
-    }, [newMessage]);
 
     const connectSocket = (authToken: string) => {
         const clientId = Math.floor(Math.random() * 1010000);
@@ -129,25 +84,18 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
             console.log('Message from server');
             if (typeof event.data === 'string') {
                 const message = event.data;
-                console.log('[message]', message);
-                if (message.startsWith('Select')) {
-                    // todo: no need to select charater
-                } else if (message.startsWith(GREETING)) {
-                    // mock user first message
-                    socket.send(MOCK_FIRST_MSG);
-                } else if (message.startsWith('[+]')) {
-                    // [+] indicates the transcription is done. stop playing audio
-                    //   chatWindow.value += `\nYou> ${message}\n`;
-                    //   stopAudioPlayback();
-                } else if (message.startsWith('[=]')) {
-                    //   // [=] indicates the response is done
-                    //   chatWindow.value += "\n\n";
-                    //   chatWindow.scrollTop = chatWindow.scrollHeight;
-                } else {
-                    // message response
-                    handleMessageStream(message);
+                const aiMessage = JSON.parse(message) as { type: string, data: string };
+                console.log('[aiMessage]', aiMessage);
+
+                if (aiMessage.type === 'text') {
+                    handleAiMessage(aiMessage.data);
+                } else if (aiMessage.type === 'score') {
+                    // set current score
+                } else if (aiMessage.type === 'end') {
+                    // handle end
+                    // display current score
                 }
-            } else {  // binary data
+            } else {  // audio binary data
                 console.log('[binary data]', event.data);
                 setAudioQueue([...audioQueue, event.data]);
             }
@@ -172,20 +120,17 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                 getChatHistory(authToken, character.character_id).then(res => {
                     if (res?.length) {
                         const messages = [] as { name: string, msg: string }[];
-                        res.filter(chatHistory => {
-                            return chatHistory.client_message_unicode !== MOCK_FIRST_MSG
-                        }).forEach(chat => {
+                        res.forEach(chat => {
                             messages.push({
-                                name: 'Y',
+                                name: 'User',
                                 msg: chat.client_message_unicode
                             });
                             messages.push({
-                                name: character.name[0],
+                                name: character.name,
                                 msg: chat.server_message_unicode
                             });
                         })
-                        console.log('loaded history messages', messages);
-                        setHistoryMessages(messages);
+                        setMessages(messages);
                     }
                 })
             }
@@ -200,12 +145,12 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
     }, [audioQueue, currentAudio]);
 
     useEffect(() => {
-        if (currentAudio && audioEnabled) {
+        if (currentAudio) {
             playAudio(currentAudio).then(res => {
                 setCurrentAudio(undefined);
             })
         }
-    }, [currentAudio, audioEnabled])
+    }, [currentAudio])
 
     const playAudio = (data: any) => {
         let blob = new Blob([data], { type: 'audio/mp3' } as any);
@@ -222,14 +167,16 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
     }
 
     const handleSendMessage = async (text: string) => {
-        setMessages([
-            ...messages,
-            {
-                name: 'Y',
-                msg: text
-            }
-        ]);
-        socket.send(text);
+        if (text) {
+            setMessages([
+                ...messages,
+                {
+                    name: 'User',
+                    msg: text
+                }
+            ]);
+            socket.send(text);
+        }
     }
 
     useEffect(() => {
@@ -240,7 +187,7 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
         <div className='chatbot-container'>
             <div className='header'>
                 <div className='return-btn' onClick={() => {
-                    // todo: disconnect ws?
+                    socket && socket.close();
                     onReturn();
                 }}>
                     <img src='./images/return_icon.svg' alt=''></img>
@@ -260,13 +207,13 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                 </div>
             </div>
 
-            <div className='message-section'>
+            <div className='message-section' ref={msgList}>
                 <div className='overlay'></div>
                 <div className='messages'>
                     {messages.map(message => {
                         return <>
                             <div className='message'>
-                                <div className='name'>{message.name}</div>
+                                <div className='name'>{message.name}:</div>
                                 <div className='msg'>{message.msg}</div>
                             </div>
                         </>
@@ -275,9 +222,16 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
             </div>
 
             <div className='input-container'>
-                <input placeholder='generated question...'></input>
+                <input
+                    value={inputValue}
+                    placeholder='say something...'
+                    onChange={(event) => {
+                        setInputValue(event.target.value);
+                    }}
+                ></input>
                 <div className='enter-btn' onClick={() => {
-                    // enter message
+                    handleSendMessage(inputValue ?? '');
+                    setInputValue('');
                 }}>
                     <img src='./images/enter_icon.svg' alt=''></img>
                 </div>
