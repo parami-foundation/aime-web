@@ -12,6 +12,7 @@ import { goerli } from 'wagmi/chains';
 import App from './App.tsx';
 import './index.scss';
 import { ClerkProvider } from "@clerk/clerk-react";
+import AIME from './pages/AIME/AIME.tsx';
 
 declare global {
   namespace JSX {
@@ -65,7 +66,7 @@ root.render(
         <BrowserRouter>
           <Routes>
             <Route path='/' element={<App />}>
-              {/* <Route path='' element={<AIME />} /> */}
+              <Route path='' element={<AIME />} />
               {/* <Route path='' element={<MyHNFT />} /> */}
               {/* <Route path='/issue' element={<IssueToken />} /> */}
               {/* <Route path='/bid' element={<BidHNFT />} /> */}
