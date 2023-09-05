@@ -15,7 +15,8 @@ export interface ChatbotProps {
 
 enum MessageType {
     MESSAGE = 'message',
-    SCORE = 'score'
+    SCORE = 'score',
+    THINK = 'think',
 }
 
 interface MessageDisplay {
@@ -73,6 +74,19 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
         })
     }
 
+    const handleThink = (msg: string) => {
+        setMessages(prevMessages => {
+            return [
+                ...prevMessages,
+                {
+                    type: MessageType.THINK,
+                    sender: character.name,
+                    content: msg
+                }
+            ];
+        })
+    }
+
     const handleScore = (score?: number) => {
         if (score !== undefined) {
             setMessages(prevMessages => {
@@ -111,6 +125,8 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                 } else if (aiMessage.type === 'score') {
                     // set current score
                     handleScore(Number(aiMessage.data));
+                } else if (aiMessage.type === 'think') {
+                    handleThink(aiMessage.data);
                 } else if (aiMessage.type === 'end') {
                     // handle end
                     // updateCurrentScore(emoScore);
@@ -281,6 +297,13 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
 
                             {message.type === MessageType.SCORE && <>
                                 <div className='emo-score'>({message.content})</div>
+                            </>}
+
+                            {message.type === MessageType.THINK && <>
+                                <div className='message'>
+                                    <div className='name'>{message.sender} is thinking:</div>
+                                    <div className='msg'>{message.content}</div>
+                                </div>
                             </>}
                         </>
                     })}

@@ -52,7 +52,7 @@
       "last 1 safari version"
     ]
   },
-  "homepage": "https://hnft.parami.io/",
+  "homepage": "https://aime.parami.io/",
   "devDependencies": {
     "@types/node": "^20.1.4",
     "@types/react": "^18.2.6",

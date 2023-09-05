@@ -23,7 +23,6 @@ function AIME({ }: AIMEProps) {
     const { data: signature, error: signMsgError, isLoading: signMsgLoading, signMessage } = useSignMessage();
     const { address, isConnected } = useAccount();
 
-
     useEffect(() => {
         if (requestUserSig) {
             if (!isConnected) {
