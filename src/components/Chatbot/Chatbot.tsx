@@ -7,6 +7,9 @@ import { getAutoQuestion, getChatHistory } from '../../services/ai.service';
 import { useAuth } from '@clerk/clerk-react';
 import { WS_Endpoint } from '../../models/aime';
 import { Dropdown } from 'antd';
+import BuyPowerDrawer from '../BuyPowerDrawer/BuyPowerDrawer';
+import { useAccount } from 'wagmi';
+import { usePowerBalance } from '../../hooks/usePowerBalance';
 
 export interface ChatbotProps {
     character: Character;
@@ -39,6 +42,15 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
     const [inputValue, setInputValue] = useState<string>();
     const { getToken } = useAuth();
     const [menuOpen, setMenuOpen] = useState<boolean>(false);
+    const [buyPowerOpen, setBuyPowerOpen] = useState<boolean>(false);
+
+    const { address, isConnected } = useAccount();
+
+    const { data: powerBalance, refetch: refreshBalance } = usePowerBalance(character.contract_address, address ?? '');
+
+    useEffect(() => {
+        console.log('power balance', `${powerBalance}`, powerBalance)
+    }, [powerBalance])
 
     const genAutoQuestion = () => {
         getToken().then(token => {
@@ -248,6 +260,7 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                         onOpenChange={(open) => {
                             setMenuOpen(open);
                         }}
+                        open={menuOpen}
                         dropdownRender={(menu) => {
                             return <>
                                 <div className='dropdown-menu'>
@@ -255,7 +268,9 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                                         <img src='/images/list_icon.svg' alt=''></img>
                                         <span>List of AIMEs</span>
                                     </div>
-                                    <div className='menu-item'>
+                                    <div className='menu-item' onClick={() => {
+                                        setBuyPowerOpen(true);
+                                    }}>
                                         <img src='/images/buy_power_icon.svg' alt=''></img>
                                         <span>Buy Powers</span>
                                     </div>
@@ -274,7 +289,7 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                             <div className='power-icon-container'>
                                 <img src='/images/power_icon.svg' alt=''></img>
                             </div>
-                            <span className='balance'>0 Power</span>
+                            <span className='balance'>{powerBalance ? `${powerBalance}` : 0} Power</span>
                             {menuOpen && <img className='caret-icon' src='/images/caret_up.svg' alt=''></img>}
                             {!menuOpen && <img className='caret-icon' src='/images/caret_down.svg' alt=''></img>}
                         </div>
@@ -336,103 +351,25 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                 </div>
             </div>
 
-            {/* {false && <>
-                <div className={`${styles.backgroundContainer}`}>
-                    <img className={`${styles.background}`} src={characterInfo?.background} referrerPolicy='no-referrer'></img>
-                </div>
-                <div className={`${styles.contentContainer}`}>
-                    <div className={`${styles.header}`}>
-                        <div className={`${styles.name}`}>
-                            {character.name}
-
-                            <div className={`${styles.audioButton}`} onClick={() => {
-                                setAudioEnabled(true);
-                            }}>
-                                <SoundFilled />
-                            </div>
-                        </div>
-
-                        <div className={`${styles.token}`}>
-                            <img className={`${styles.tokenIcon}`} src={characterInfo?.tokenIcon} referrerPolicy='no-referrer'></img>
-                            <div className={`${styles.tokenPrice}`}>
-                                86 ETH
-                            </div>
-                            <div className={`${styles.dropdownArrow}`}>
-                                <CaretDownOutlined />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className={`${styles.chat}`}>
-                        <div className={`${styles.messageListContainer}`} ref={msgList}>
-                            <div className={`${styles.messages}`}>
-                                {historyMessages.length > 0 && <>
-                                    {historyMessages.map(message => {
-                                        return <>
-                                            <div className={`${styles.message}`}>
-                                                {message.name}: {message.msg}
-                                            </div>
-                                        </>
-                                    })}
-                                </>}
-
-                                {messages.length > 0 && <>
-                                    {messages.map(message => {
-                                        return <>
-                                            <div className={`${styles.message}`}>
-                                                {message.name}: {message.msg}
-                                            </div>
-                                        </>
-                                    })}
-                                </>}
-
-                                {newMessage.length > 0 && <>
-                                    <div className={`${styles.message}`}>
-                                        {character.name[0]}: {newMessage}
-                                    </div>
-                                </>}
-                            </div>
-                        </div>
-                        <div className={`${styles.messageInput}`}>
-                            <input className={`${styles.textInput}`} value={inputValue} autoFocus={true}
-                                onChange={(event) => {
-                                    setInputValue(event.target.value);
-                                }}
-                                onKeyDown={(event) => {
-                                    if (event.key === 'Enter') {
-                                        event.preventDefault();
-                                        const msg = (event.target as HTMLInputElement).value;
-                                        setInputValue('');
-                                        handleSendMessage(msg);
-                                    }
-                                }}
-                            ></input>
-                        </div>
-                    </div>
-
-                    <div className={`${styles.footer}`}>
-                        <div className={`${styles.button} ${styles.questionOption}`} onClick={() => {
-                            if (questionOption) {
-                                handleSendMessage(questionOption);
-                            }
-                            const question = pickOneQuestion(characterInfo?.questions ?? [`Sir wen moon?`]);
-                            setQuestionOption(question);
-                        }}>
-                            <div>{questionOption}</div>
-                            <div className={`${styles.icon}`}>
-                                <ArrowRightOutlined />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </>} */}
-
             <div className='audio-container'>
                 <audio className="audio-player" ref={audioPlayer}>
                     <source src="" type="audio/mp3" />
                 </audio>
             </div>
         </div>
+
+        {buyPowerOpen && <>
+            <BuyPowerDrawer
+                character={character}
+                onClose={() => {
+                    setBuyPowerOpen(false)
+                }}
+                onSuccess={() => {
+                    setBuyPowerOpen(false);
+                    refreshBalance();
+                }}
+            ></BuyPowerDrawer>
+        </>}
     </>;
 };
 

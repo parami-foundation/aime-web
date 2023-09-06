@@ -1,0 +1,116 @@
+import React, { useEffect, useState } from 'react';
+import MobileDrawer from '../MobileDrawer/MobileDrawer';
+import { useAccount } from 'wagmi';
+import { useWeb3Modal } from '@web3modal/react';
+import './BuyPowerDrawer.scss';
+import { Character } from '../../models/character';
+import { useBuyPowerPrice } from '../../hooks/useBuyPowerPrice';
+import { ethers } from 'ethers';
+import { useBuyPower } from '../../hooks/useBuyPower';
+import InfoModal from '../InfoModal/InfoModal';
+
+export interface BuyPowerDrawerProps {
+    character: Character;
+    onClose: () => void;
+    onSuccess: () => void;
+}
+
+function BuyPowerDrawer({ character, onClose, onSuccess }: BuyPowerDrawerProps) {
+    const { address, isConnected } = useAccount();
+    const { open } = useWeb3Modal();
+    const [amount, setAmount] = useState<number>(1);
+
+    const price = useBuyPowerPrice(character.contract_address, amount);
+    const { buyPower, prepareError, isSuccess, isLoading } = useBuyPower(character.contract_address, amount);
+
+    const buyPowerReady = !!buyPower;
+
+    // todo: remove this and add loading ui
+    useEffect(() => {
+        console.log('buy power loading', isLoading);
+        console.log('error', prepareError);
+        console.log('ready', buyPowerReady);
+    }, [isLoading, prepareError, buyPowerReady])
+
+    const changeAmount = (change: number) => {
+        const newAmount = amount + change;
+        if (newAmount > 0) {
+            setAmount(newAmount);
+        }
+    }
+
+    return <>
+        <MobileDrawer
+            closable={true}
+            onClose={() => {
+                onClose();
+            }}
+        >
+            <div className='buy-power-container'>
+                <div className='title'>BUY POWER</div>
+                <div className='powers'>
+                    <div className='power-icon'>
+                        <img src={character.avatar_url} alt=''></img>
+                    </div>
+                    <div className='power-amount'>
+                        <div className='power-name'>
+                            {character.name} Power <span className='x-mark'>X</span> {amount}
+                        </div>
+                        <div className='amount-input'>
+                            <div className='minus-btn' onClick={() => {
+                                changeAmount(-1)
+                            }}>
+                                <img src='/images/minus_icon.svg' alt=''></img>
+                            </div>
+                            <div className='amount-value'>{amount}</div>
+                            <div className='plus-btn' onClick={() => {
+                                changeAmount(1)
+                            }}>
+                                <img src='/images/plus_icon.svg' alt=''></img>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className='divider'></div>
+                <div className='footer'>
+                    {!isConnected && <>
+                        <div className='btn-container'>
+                            <div className='connect-btn' onClick={() => {
+                                open();
+                            }}>
+                                <img src='/images/wallet_icon_white.svg' alt=''></img>
+                                Connect Wallet
+                            </div>
+                        </div>
+                    </>}
+
+                    {isConnected && <>
+                        <div className='total-price'>
+                            <div className='label'>Total:</div>
+                            <div className='value'>{price ? ethers.utils.formatEther(price) : 0} ETH</div>
+                        </div>
+                        <div className='buy-btn' onClick={() => {
+                            buyPower?.();
+                        }}>
+                            BUY
+                        </div>
+                    </>}
+                </div>
+            </div>
+
+            {isSuccess && <>
+                <InfoModal
+                    image='/images/purchase_success.svg'
+                    title='Purchase Successful'
+                    description={`You have successfully purchased ${amount} ${character.name} Power.`}
+                    onOk={() => {
+                        onSuccess();
+                    }}
+                    okText='OK'
+                ></InfoModal>
+            </>}
+        </MobileDrawer>
+    </>;
+};
+
+export default BuyPowerDrawer;

@@ -2,13 +2,14 @@ export interface Character {
   avatar: string;
   // author_name?: string;
   // avatar_id?: string;
-  // avatar_url: string;
+  avatar_url: string;
   character_id: string;
   // image_url?: string; // todo: what is this?
   name: string;
   // source: string;
   // twitter_handle: string;
   // voice_id: string;
+  contract_address: string;
 }
 
 export interface CharacterInfo {

@@ -68,6 +68,8 @@ root.render(
       </ClerkProvider>
     </WagmiConfig>
 
-    <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
+    <Web3Modal themeVariables={{
+      '--w3m-z-index': '1001'
+    }} projectId={projectId} ethereumClient={ethereumClient} />
   </>
 );
