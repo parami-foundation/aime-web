@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import {
   EthereumClient,
   w3mConnectors,
-  w3mProvider
+  w3mProvider,
 } from '@web3modal/ethereum';
 import { Web3Modal } from '@web3modal/react';
 import { configureChains, createConfig, WagmiConfig } from 'wagmi';
@@ -14,6 +14,7 @@ import './index.scss';
 import { ClerkProvider } from "@clerk/clerk-react";
 import AIME from './pages/AIME/AIME.tsx';
 import Rewards from './pages/Rewards/Rewards.tsx';
+import { infuraProvider } from 'wagmi/providers/infura'
 
 const chains = [goerli]
 const projectId = '2e586b0807500a0da3a4f7b66418295e';
@@ -21,7 +22,8 @@ const INFURA_API_KEY = '46cdd1b1481049b992a90914cc17b52f';
 
 const { publicClient } = configureChains(
   chains,
-  [w3mProvider({ projectId })]
+  [infuraProvider({ apiKey: INFURA_API_KEY }), w3mProvider({ projectId })]
+  // w3mProvider({ projectId }),
   // [infuraProvider({ apiKey: INFURA_API_KEY }), publicProvider()]
 );
 

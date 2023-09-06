@@ -26,10 +26,6 @@ function AIME({ }: AIMEProps) {
     const { data: balanceList, refetch } = usePowerBalanceList((characters ?? []).map(c => c.contract_address), address ?? '');
 
     useEffect(() => {
-        console.log('all balance', balanceList)
-    }, [balanceList])
-
-    useEffect(() => {
         if (requestUserSig) {
             if (!isConnected) {
                 open().catch(e => console.log(e));
