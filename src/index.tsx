@@ -13,14 +13,7 @@ import App from './App.tsx';
 import './index.scss';
 import { ClerkProvider } from "@clerk/clerk-react";
 import AIME from './pages/AIME/AIME.tsx';
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'hnft-badge': any
-    }
-  }
-}
+import Rewards from './pages/Rewards/Rewards.tsx';
 
 const chains = [goerli]
 const projectId = '2e586b0807500a0da3a4f7b66418295e';
@@ -67,6 +60,7 @@ root.render(
           <Routes>
             <Route path='/' element={<App />}>
               <Route path='' element={<AIME />} />
+              <Route path='rewards' element={<Rewards></Rewards>} />
               <Route path='*' element={<Navigate to='/' />} />
             </Route>
           </Routes>
