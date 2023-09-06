@@ -8,6 +8,7 @@ import { useBuyPowerPrice } from '../../hooks/useBuyPowerPrice';
 import { ethers } from 'ethers';
 import { useBuyPower } from '../../hooks/useBuyPower';
 import InfoModal from '../InfoModal/InfoModal';
+import { LoadingOutlined } from '@ant-design/icons';
 
 export interface BuyPowerDrawerProps {
     character: Character;
@@ -21,16 +22,7 @@ function BuyPowerDrawer({ character, onClose, onSuccess }: BuyPowerDrawerProps) 
     const [amount, setAmount] = useState<number>(1);
 
     const price = useBuyPowerPrice(character.contract_address, amount);
-    const { buyPower, prepareError, isSuccess, isLoading } = useBuyPower(character.contract_address, amount);
-
-    const buyPowerReady = !!buyPower;
-
-    // todo: remove this and add loading ui
-    useEffect(() => {
-        console.log('buy power loading', isLoading);
-        console.log('error', prepareError);
-        console.log('ready', buyPowerReady);
-    }, [isLoading, prepareError, buyPowerReady])
+    const { buyPower, isSuccess, isLoading } = useBuyPower(character.contract_address, amount);
 
     const changeAmount = (change: number) => {
         const newAmount = amount + change;
@@ -90,8 +82,13 @@ function BuyPowerDrawer({ character, onClose, onSuccess }: BuyPowerDrawerProps) 
                             <div className='value'>{price ? ethers.utils.formatEther(price) : 0} ETH</div>
                         </div>
                         <div className='buy-btn' onClick={() => {
-                            buyPower?.();
+                            if (!isLoading) {
+                                buyPower?.();
+                            }
                         }}>
+                            {isLoading && <>
+                                <LoadingOutlined style={{ fontSize: 16, marginRight: 6 }} spin />
+                            </>}
                             BUY
                         </div>
                     </>}

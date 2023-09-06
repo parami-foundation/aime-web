@@ -9,6 +9,7 @@ import { useAuth, useClerk, useUser } from '@clerk/clerk-react';
 import { useAccount, useSignMessage } from 'wagmi';
 import { useWeb3Modal } from '@web3modal/react';
 import { BIND_WALLET_MESSAGE } from '../../models/aime';
+import { usePowerBalanceList } from '../../hooks/usePowerBalanceList';
 
 export interface AIMEProps { }
 
@@ -22,6 +23,11 @@ function AIME({ }: AIMEProps) {
     const { open } = useWeb3Modal();
     const { data: signature, error: signMsgError, isLoading: signMsgLoading, signMessage } = useSignMessage();
     const { address, isConnected } = useAccount();
+    const { data: balanceList, refetch } = usePowerBalanceList((characters ?? []).map(c => c.contract_address), address ?? '');
+
+    useEffect(() => {
+        console.log('all balance', balanceList)
+    }, [balanceList])
 
     useEffect(() => {
         if (requestUserSig) {
@@ -81,7 +87,6 @@ function AIME({ }: AIMEProps) {
                 </div>
             </>}
 
-
             {isSignedIn && <>
                 {!character && <>
                     <div className='select-character-container'>
@@ -89,14 +94,14 @@ function AIME({ }: AIMEProps) {
 
                         <div className='characters-container'>
                             {characters && characters.length > 0 && <>
-                                {characters.map(char => {
+                                {characters.map((char, index) => {
                                     return <>
                                         <div className='character-card'>
                                             <div className='power-balance'>
                                                 <div className='power-icon-container'>
                                                     <img src='/images/power_icon.svg' alt=''></img>
                                                 </div>
-                                                0 Power
+                                                {(balanceList ?? [])[index] ?? 0} Power
                                             </div>
                                             <div className='avatar'>
                                                 <img src={char.avatar} alt='' />
@@ -139,6 +144,7 @@ function AIME({ }: AIMEProps) {
                     <div className='chat-container'>
                         <Chatbot character={character} onReturn={() => {
                             setCharacter(undefined);
+                            refetch();
                         }}></Chatbot>
                     </div>
                 </>}

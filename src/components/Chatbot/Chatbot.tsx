@@ -8,8 +8,9 @@ import { useAuth } from '@clerk/clerk-react';
 import { WS_Endpoint } from '../../models/aime';
 import { Dropdown } from 'antd';
 import BuyPowerDrawer from '../BuyPowerDrawer/BuyPowerDrawer';
-import { useAccount } from 'wagmi';
+import { useAccount, useDisconnect } from 'wagmi';
 import { usePowerBalance } from '../../hooks/usePowerBalance';
+import { useWeb3Modal } from '@web3modal/react';
 
 export interface ChatbotProps {
     character: Character;
@@ -45,12 +46,10 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
     const [buyPowerOpen, setBuyPowerOpen] = useState<boolean>(false);
 
     const { address, isConnected } = useAccount();
+    const { disconnect } = useDisconnect();
+    const { open } = useWeb3Modal();
 
     const { data: powerBalance, refetch: refreshBalance } = usePowerBalance(character.contract_address, address ?? '');
-
-    useEffect(() => {
-        console.log('power balance', `${powerBalance}`, powerBalance)
-    }, [powerBalance])
 
     const genAutoQuestion = () => {
         getToken().then(token => {
@@ -272,7 +271,7 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                                         setBuyPowerOpen(true);
                                     }}>
                                         <img src='/images/buy_power_icon.svg' alt=''></img>
-                                        <span>Buy Powers</span>
+                                        <span>Buy Power</span>
                                     </div>
                                     <div className='menu-item'>
                                         <img src='/images/tips_icon.svg' alt=''></img>
@@ -281,6 +280,19 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                                     <div className='menu-item'>
                                         <img src='/images/reward_icon.svg' alt=''></img>
                                         <span>My Rewards</span>
+                                    </div>
+                                    <div className='menu-item' onClick={() => {
+                                        if (isConnected) {
+                                            disconnect();
+                                        } else {
+                                            open();
+                                        }
+                                    }}>
+                                        <img src='/images/wallet_small_icon.svg' alt=''></img>
+                                        <span>
+                                            {isConnected && <>Disconnect Wallet</>}
+                                            {!isConnected && <>Connect Wallet</>}
+                                        </span>
                                     </div>
                                 </div>
                             </>
