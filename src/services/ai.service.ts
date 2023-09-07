@@ -106,7 +106,7 @@ export const bindWallet = async (token: string, address: string, message: string
     signature: signature
   });
 
-  const resp = await fetch(`${PARAMI_AI}/bid_wallet`, {
+  const resp = await fetch(`${PARAMI_AI}/bind_wallet`, {
     method: 'post',
     headers: {
       'Authorization': `Bearer ${token}`,
