@@ -10,6 +10,7 @@ export interface InfoModalProps {
     onOk: () => void;
     linkText?: string;
     onLink?: () => void;
+    closable?: boolean
 }
 
 function InfoModal({
@@ -19,7 +20,8 @@ function InfoModal({
     okText,
     onOk,
     linkText,
-    onLink
+    onLink,
+    closable = true
 }: InfoModalProps) {
     return <>
         <Modal
@@ -41,9 +43,11 @@ function InfoModal({
                 <div className='description'>
                     {description}
                 </div>
-                <div className='ok-btn' onClick={() => onOk()}>
-                    {okText}
-                </div>
+                {closable && <>
+                    <div className='ok-btn' onClick={() => onOk()}>
+                        {okText}
+                    </div>
+                </>}
                 {linkText && onLink && <>
                     <div className='link-btn' onClick={() => onLink()}>
                         {linkText}

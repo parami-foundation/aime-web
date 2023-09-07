@@ -6,6 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAIMeContract } from '../../hooks/useAIMeContract';
 import { useAccount } from 'wagmi';
 import { notification } from 'antd';
+import { useClaimPower } from '../../hooks/useClaimPower';
+import InfoModal from '../../components/InfoModal/InfoModal';
+import { LoadingOutlined } from '@ant-design/icons';
 
 export interface RewardsProps { }
 
@@ -33,6 +36,15 @@ function Rewards({ }: RewardsProps) {
     const { address, isConnected } = useAccount();
     const [rewardRecords, setRewardRecords] = useState<RewardRecord[]>();
     const [claimedRecords, setClaimedRecords] = useState<RewardRecord[]>();
+    const [claimingRecord, setClaimingRecord] = useState<RewardRecord>();
+    const { claimPower, isLoading, isSuccess } = useClaimPower(claimingRecord?.powerAddress ?? '', claimingRecord?.amount ?? 0, claimingRecord?.id ?? 0, claimingRecord?.signature ?? '')
+    const claimPowerReady = !!claimPower;
+
+    useEffect(() => {
+        if (claimPowerReady) {
+            claimPower?.();
+        }
+    }, [claimPowerReady])
 
     const fetchRewards = async () => {
         const token = await getToken();
@@ -94,8 +106,11 @@ function Rewards({ }: RewardsProps) {
                     if (!sig) {
                         return;
                     }
-
-                    sig && console.log('Got sig!', sig);
+                    console.log('got sig', sig);
+                    setClaimingRecord({
+                        ...record,
+                        signature: sig
+                    })
                 }}>Claim</div>
             </>}
         </div>
@@ -163,7 +178,7 @@ function Rewards({ }: RewardsProps) {
                 </>}
             </div>
 
-            {process.env.NODE_ENV === 'development' && <>
+            {/* {process.env.NODE_ENV === 'development' && <>
                 <div className='button-container'>
                     <div className='btn-large' onClick={async () => {
                         const token = await getToken();
@@ -172,8 +187,41 @@ function Rewards({ }: RewardsProps) {
                         }
                     }}>Issue Reward</div>
                 </div>
-            </>}
+            </>} */}
         </div>
+
+        {isLoading && <>
+            <InfoModal
+                image='/images/gift_icon.svg'
+                title='Claiming Powers'
+                description={<>
+                    <div className='claim-loading-info'>
+                        <span className='line'>Please wait for transaction confirmation.</span>
+                        <span className='line'>
+                            <LoadingOutlined style={{ fontSize: 20 }} spin />
+                        </span>
+                    </div>
+                </>}
+                closable={false}
+                onOk={() => { }}
+                okText='OK'
+            ></InfoModal>
+        </>}
+
+        {isSuccess && <>
+            <InfoModal
+                image='/images/reward_image.svg'
+                title='Power Claimed'
+                description={<>
+                    You have successfully claimed your reward powers.
+                </>}
+                onOk={() => {
+                    setClaimingRecord(undefined);
+                    fetchRewards()
+                }}
+                okText='OK'
+            ></InfoModal>
+        </>}
     </>;
 };
 
