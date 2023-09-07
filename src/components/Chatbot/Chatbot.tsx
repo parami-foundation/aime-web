@@ -282,6 +282,10 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
         scrollDown();
     }, [messages])
 
+    const closeMenu = () => {
+        setMenuOpen(false);
+    }
+
     return <>
         <div className='chatbot-container'>
             <div className='header'>
@@ -300,7 +304,7 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                 <div className='avatar-container'>
                     <img src={character.avatar} alt=''></img>
 
-                    <Dropdown menu={{ items: [] }} placement="bottomRight"
+                    <Dropdown menu={{ items: [] }} placement="bottomRight" trigger={['click']}
                         onOpenChange={(open) => {
                             setMenuOpen(open);
                         }}
@@ -317,12 +321,14 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                                     </div>
                                     <div className='menu-item' onClick={() => {
                                         setBuyPowerOpen(true);
+                                        closeMenu();
                                     }}>
                                         <img src='/images/buy_power_icon.svg' alt=''></img>
                                         <span>Buy Power</span>
                                     </div>
                                     <div className='menu-item' onClick={() => {
                                         setShowTips(true);
+                                        closeMenu();
                                     }}>
                                         <img src='/images/tips_icon.svg' alt=''></img>
                                         <span>AIME Tips</span>
