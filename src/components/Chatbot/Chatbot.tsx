@@ -2,15 +2,17 @@ import React, { useEffect, useState } from 'react';
 // import styles from './Chatbot.module.scss';
 import './Chatbot.scss';
 import { useRef } from 'react';
-import { Character, characters } from '../../models/character';
+import { Character } from '../../models/character';
 import { getAutoQuestion, getChatHistory } from '../../services/ai.service';
 import { useAuth } from '@clerk/clerk-react';
 import { WS_Endpoint } from '../../models/aime';
 import { Dropdown } from 'antd';
 import BuyPowerDrawer from '../BuyPowerDrawer/BuyPowerDrawer';
 import { useAccount, useDisconnect } from 'wagmi';
-import { usePowerBalance } from '../../hooks/usePowerBalance';
 import { useWeb3Modal } from '@web3modal/react';
+import { useNavigate } from 'react-router-dom';
+import { useAIMeContract } from '../../hooks/useAIMeContract';
+import InfoModal from '../InfoModal/InfoModal';
 
 export interface ChatbotProps {
     character: Character;
@@ -44,12 +46,27 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
     const { getToken } = useAuth();
     const [menuOpen, setMenuOpen] = useState<boolean>(false);
     const [buyPowerOpen, setBuyPowerOpen] = useState<boolean>(false);
+    const navigate = useNavigate();
+    const [showTips, setShowTips] = useState<boolean>(false);
 
     const { address, isConnected } = useAccount();
     const { disconnect } = useDisconnect();
     const { open } = useWeb3Modal();
 
-    const { data: powerBalance, refetch: refreshBalance } = usePowerBalance(character.contract_address, address ?? '');
+    const aimeContract = useAIMeContract();
+
+    const [powerBalance, setPowerBalance] = useState<string>();
+
+    const fetchPowerBalance = async () => {
+        const balance = await aimeContract?.sharesBalance(character.contract_address, address);
+        setPowerBalance(balance.toString());
+    }
+
+    useEffect(() => {
+        if (aimeContract && address) {
+            fetchPowerBalance();
+        }
+    }, [aimeContract, address])
 
     const genAutoQuestion = () => {
         getToken().then(token => {
@@ -263,7 +280,10 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                         dropdownRender={(menu) => {
                             return <>
                                 <div className='dropdown-menu'>
-                                    <div className='menu-item'>
+                                    <div className='menu-item' onClick={() => {
+                                        onReturn();
+                                        // navigate('/');
+                                    }}>
                                         <img src='/images/list_icon.svg' alt=''></img>
                                         <span>List of AIMEs</span>
                                     </div>
@@ -273,11 +293,15 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                                         <img src='/images/buy_power_icon.svg' alt=''></img>
                                         <span>Buy Power</span>
                                     </div>
-                                    <div className='menu-item'>
+                                    <div className='menu-item' onClick={() => {
+                                        setShowTips(true);
+                                    }}>
                                         <img src='/images/tips_icon.svg' alt=''></img>
                                         <span>AIME Tips</span>
                                     </div>
-                                    <div className='menu-item'>
+                                    <div className='menu-item' onClick={() => {
+                                        navigate('/rewards');
+                                    }}>
                                         <img src='/images/reward_icon.svg' alt=''></img>
                                         <span>My Rewards</span>
                                     </div>
@@ -378,10 +402,27 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                 }}
                 onSuccess={() => {
                     setBuyPowerOpen(false);
-                    refreshBalance();
+                    fetchPowerBalance();
                 }}
             ></BuyPowerDrawer>
         </>}
+
+        {showTips && <>
+            <InfoModal
+                image='/images/aime_tips.svg'
+                title='AIME Tips'
+                description={
+                    <>
+                        <div>1. You can chat with AIMEs at any time, but if you would like to receive AIME Power rewards, you must first purchase at least 1 Power.</div>
+                        <div>2. You can receive up to three Power rewards per day.</div>
+                    </>}
+                okText='Got It'
+                onOk={() => {
+                    setShowTips(false);
+                }}
+            ></InfoModal>
+        </>
+        }
     </>;
 };
 

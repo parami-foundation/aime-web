@@ -21,7 +21,7 @@ function BuyPowerDrawer({ character, onClose, onSuccess }: BuyPowerDrawerProps) 
     const { open } = useWeb3Modal();
     const [amount, setAmount] = useState<number>(1);
 
-    const price = useBuyPowerPrice(character.contract_address, amount);
+    const { price, loading: loadingPrice } = useBuyPowerPrice(character.contract_address, amount);
     const { buyPower, isSuccess, isLoading } = useBuyPower(character.contract_address, amount);
 
     const changeAmount = (change: number) => {
@@ -82,11 +82,11 @@ function BuyPowerDrawer({ character, onClose, onSuccess }: BuyPowerDrawerProps) 
                             <div className='value'>{price ? ethers.utils.formatEther(price) : 0} ETH</div>
                         </div>
                         <div className='buy-btn' onClick={() => {
-                            if (!isLoading) {
+                            if (!isLoading && !loadingPrice) {
                                 buyPower?.();
                             }
                         }}>
-                            {isLoading && <>
+                            {(isLoading || loadingPrice) && <>
                                 <LoadingOutlined style={{ fontSize: 16, marginRight: 6 }} spin />
                             </>}
                             BUY

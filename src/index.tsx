@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, HashRouter } from 'react-router-dom';
 import {
   EthereumClient,
   w3mConnectors,
@@ -15,6 +15,8 @@ import { ClerkProvider } from "@clerk/clerk-react";
 import AIME from './pages/AIME/AIME.tsx';
 import Rewards from './pages/Rewards/Rewards.tsx';
 import { infuraProvider } from 'wagmi/providers/infura'
+// import TestPage from './pages/TestPage/TestPage.tsx';
+import { publicProvider } from 'wagmi/providers/public'
 
 const chains = [goerli]
 const projectId = '2e586b0807500a0da3a4f7b66418295e';
@@ -22,7 +24,8 @@ const INFURA_API_KEY = '46cdd1b1481049b992a90914cc17b52f';
 
 const { publicClient } = configureChains(
   chains,
-  [infuraProvider({ apiKey: INFURA_API_KEY }), w3mProvider({ projectId })]
+  [w3mProvider({ projectId })]
+  // [publicProvider()]
   // w3mProvider({ projectId }),
   // [infuraProvider({ apiKey: INFURA_API_KEY }), publicProvider()]
 );
@@ -58,15 +61,16 @@ root.render(
   <>
     <WagmiConfig config={wagmiConfig}>
       <ClerkProvider publishableKey={clerkPubKey}>
-        <BrowserRouter>
+        <HashRouter>
           <Routes>
             <Route path='/' element={<App />}>
               <Route path='' element={<AIME />} />
               <Route path='rewards' element={<Rewards></Rewards>} />
+              {/* <Route path='test' element={<TestPage></TestPage>} /> */}
               <Route path='*' element={<Navigate to='/' />} />
             </Route>
           </Routes>
-        </BrowserRouter>
+        </HashRouter>
       </ClerkProvider>
     </WagmiConfig>
 

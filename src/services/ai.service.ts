@@ -71,25 +71,23 @@ export const getAutoQuestion = async (token: string, charaterName: string) => {
 }
 
 export const getPowerRewards = async (token: string) => {
-  if (mock) {
-    return [
-      {
-        id: '123',
-        user_id: '',
-        token_icon: 'https://pbs.twimg.com/profile_images/1683325380441128960/yRsRRjGO.jpg',
-        token_name: 'Elon Musk AI Power',
-        token_symbol: '$MUSK',
-        amount: '10000000000000000'
-      }
-    ] as PowerReward[];
-  }
-  const resp = await fetch(`${PARAMI_AI}/power_rewards`, {
+  const resp = await fetch(`${PARAMI_AI}/user_tokens`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
   });
   const rewards = await resp.json() as PowerReward[];
   return rewards;
+}
+
+export const getPowerRewardLimit = async (token: string) => {
+  const resp = await fetch(`${PARAMI_AI}/tokens_limit`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  const limits = await resp.json();
+  return limits;
 }
 
 export const getPowerRewardWithdrawSig = async (token: string, rewardId: string) => {

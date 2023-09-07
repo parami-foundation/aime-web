@@ -1,28 +1,50 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './Rewards.scss';
-import InfoModal from '../../components/InfoModal/InfoModal';
-import MobileDrawer from '../../components/MobileDrawer/MobileDrawer';
-import BuyPowerDrawer from '../../components/BuyPowerDrawer/BuyPowerDrawer';
+import { useAuth } from '@clerk/clerk-react';
+import { getPowerRewardLimit, getPowerRewards } from '../../services/ai.service';
+import { useNavigate } from 'react-router-dom';
 
 export interface RewardsProps { }
 
 function Rewards({ }: RewardsProps) {
+    const { getToken } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        getToken().then(token => {
+            if (token) {
+                getPowerRewards(token).then(rewards => {
+                    console.log('reward', rewards);
+                })
+
+                getPowerRewardLimit(token).then(limits => {
+                    console.log('limit', limits);
+                }).catch(err => {
+                    console.log(err)
+                })
+            }
+        })
+    }, [])
+
     return <>
-        Rewards
+        <div className='rewards-container'>
+            <div className='header'>
+                <div className='return-btn' onClick={() => {
+                    navigate('/')
+                }}>
+                    <img src='./images/return_icon.svg' alt=''></img>
+                </div>
+                <div className='title'>
+                    My Rewards
+                </div>
+            </div>
 
-        {/* <InfoModal
-            image='/images/reward_image.svg'
-            title='+1 SBF Power'
-            description='You have earned +1 SBF Power'
-            okText='OK'
-            onOk={() => {
-                console.log('on ok')
-            }}
-            linkText='View my rewards'
-            onLink={() => {}}
-        ></InfoModal> */}
-
-        {/* <BuyPowerDrawer character={{} as any}></BuyPowerDrawer> */}
+            <div className='no-rewards'>
+                <img src='/images/no_rewards.svg' alt=''></img>
+                <div className='title'>No Reward</div>
+                <div className='sub-title'>You haven't received any rewards yet.</div>
+            </div>
+        </div>
     </>;
 };
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import './AIME.scss';
 import { useParams } from 'react-router-dom';
 import Chatbot from '../../components/Chatbot/Chatbot';
@@ -10,6 +10,7 @@ import { useAccount, useSignMessage } from 'wagmi';
 import { useWeb3Modal } from '@web3modal/react';
 import { BIND_WALLET_MESSAGE } from '../../models/aime';
 import { usePowerBalanceList } from '../../hooks/usePowerBalanceList';
+import { useAIMeContract } from '../../hooks/useAIMeContract';
 
 export interface AIMEProps { }
 
@@ -23,7 +24,24 @@ function AIME({ }: AIMEProps) {
     const { open } = useWeb3Modal();
     const { data: signature, error: signMsgError, isLoading: signMsgLoading, signMessage } = useSignMessage();
     const { address, isConnected } = useAccount();
-    const { data: balanceList, refetch } = usePowerBalanceList((characters ?? []).map(c => c.contract_address), address ?? '');
+    const aimeContract = useAIMeContract();
+    const [balanceList, setBalanceList] = useState<string[]>([]);
+    // const { data: balanceList, refetch } = usePowerBalanceList((characters ?? []).map(c => c.contract_address), address ?? '');
+
+    const fetchPowerBalanceList = async () => {
+        console.log('fetching balance list')
+        const list = await Promise.all((characters ?? []).map(async char => {
+            const balance = await aimeContract?.sharesBalance(char.contract_address, address);
+            return balance.toString();
+        }))
+        setBalanceList(list);
+    }
+
+    useEffect(() => {
+        if (address && aimeContract && characters) {
+            fetchPowerBalanceList();
+        }
+    }, [address, aimeContract, characters])
 
     useEffect(() => {
         if (requestUserSig) {
@@ -140,7 +158,7 @@ function AIME({ }: AIMEProps) {
                     <div className='chat-container'>
                         <Chatbot character={character} onReturn={() => {
                             setCharacter(undefined);
-                            refetch();
+                            fetchPowerBalanceList();
                         }}></Chatbot>
                     </div>
                 </>}

@@ -4,14 +4,14 @@ import AIMePowersContract from '../contracts/AIMePowers.json';
 import { usePrepareContractWrite, useContractWrite, useWaitForTransaction } from "wagmi";
 
 export const useBuyPower = (aimeAddress: string, amount: number) => {
-  const price = useBuyPowerPrice(aimeAddress, amount);
+  const { price } = useBuyPowerPrice(aimeAddress, amount);
 
   const { config, error: prepareError } = usePrepareContractWrite({
     address: AIME_CONTRACT,
     abi: AIMePowersContract.abi,
     functionName: 'buyShares',
     args: [aimeAddress, amount],
-    value: price,
+    value: price?.toBigInt(),
   });
 
   const { data, isLoading: writeLoading, write: buyPower, isError, error } = useContractWrite(config);

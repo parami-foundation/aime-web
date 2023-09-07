@@ -5,7 +5,7 @@ import { Modal } from 'antd';
 export interface InfoModalProps {
     image: string;
     title: string;
-    description: string;
+    description: string | React.ReactNode;
     okText: string;
     onOk: () => void;
     linkText?: string;

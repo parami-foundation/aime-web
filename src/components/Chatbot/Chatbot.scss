@@ -161,6 +161,8 @@
   min-width: 130px;
 
   .menu-item {
+    max-width: 130px;
+    overflow: hidden;
     display: flex;
     align-items: flex-end;
     font-size: 12px;
