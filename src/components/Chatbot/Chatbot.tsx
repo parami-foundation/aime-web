@@ -54,6 +54,7 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
     const [powerBalance, setPowerBalance] = useState<string>();
     const { userInfo, refresh } = useUserInfo();
     const { data: signature, error: signMsgError, isLoading: signMsgLoading, signMessage } = useSignMessage();
+    const [rewardModal, setRewardModal] = useState<boolean>(false);
 
     useEffect(() => {
         if (userInfo && address) {
@@ -174,10 +175,13 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
             console.log('Message from server');
             if (typeof event.data === 'string') {
                 const message = event.data;
-                const aiMessage = JSON.parse(message) as { type: string, data: string };
+                const aiMessage = JSON.parse(message) as { type: string, data: string, given_token: boolean };
                 console.log('[aiMessage]', aiMessage);
                 if (aiMessage.type === 'text') {
                     handleAiMessage(aiMessage.data);
+                    if (aiMessage.given_token) {
+                        setRewardModal(true);
+                    }
                 } else if (aiMessage.type === 'score') {
                     // set current score
                     handleScore(Number(aiMessage.data));
@@ -445,8 +449,26 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                     setShowTips(false);
                 }}
             ></InfoModal>
-        </>
-        }
+        </>}
+
+        {rewardModal && <>
+            <InfoModal
+                image='/images/reward_image.svg'
+                title={`+1 ${character.name} Power`}
+                description={<>
+                    You are rewarded with 1 {character.name} Power!
+                </>}
+                onOk={() => {
+                    setRewardModal(false);
+                }}
+                okText='OK'
+                linkText='View my rewards'
+                onLink={() => {
+                    setRewardModal(false);
+                    navigate('/rewards');
+                }}
+            ></InfoModal>
+        </>}
     </>;
 };
 
