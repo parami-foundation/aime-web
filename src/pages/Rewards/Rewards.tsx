@@ -17,11 +17,11 @@ function Rewards({ }: RewardsProps) {
                     console.log('reward', rewards);
                 })
 
-                getPowerRewardLimit(token).then(limits => {
-                    console.log('limit', limits);
-                }).catch(err => {
-                    console.log(err)
-                })
+                // getPowerRewardLimit(token).then(limits => {
+                //     console.log('limit', limits);
+                // }).catch(err => {
+                //     console.log(err)
+                // })
             }
         })
     }, [])

@@ -22,6 +22,14 @@ export interface WithdrawSignature {
   sig: string;
 }
 
+export interface UserInfo {
+  auth_type: string;
+  chain_id: number;
+  id: number;
+  name: string;
+  wallet_address: string;
+}
+
 const avatars = {
   'elon_musk': './images/elon_avatar.jpg',
   'SBF': './images/sbf_avatar.png',
@@ -80,14 +88,44 @@ export const getPowerRewards = async (token: string) => {
   return rewards;
 }
 
-export const getPowerRewardLimit = async (token: string) => {
-  const resp = await fetch(`${PARAMI_AI}/tokens_limit`, {
+export const getUserInfo = async (token: string) => {
+  const resp = await fetch(`${PARAMI_AI}/mine`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
   });
-  const limits = await resp.json();
-  return limits;
+  const userInfo = await resp.json() as UserInfo;
+  return userInfo;
+}
+
+export const bindWallet = async (token: string, address: string, message: string, signature: string) => {
+  const data = JSON.stringify({
+    wallet: address,
+    chain_id: 5,
+    message: message,
+    signature: signature
+  });
+
+  const resp = await fetch(`${PARAMI_AI}/bid_wallet`, {
+    method: 'post',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: data
+  });
+
+  return await resp.json();
+}
+
+export const getPowerRewardLimit = async (token: string, character_id: string) => {
+  const resp = await fetch(`${PARAMI_AI}/tokens_limit?character_id=${character_id}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  const limit = await resp.json() as { count: number, limit: number };
+  return limit;
 }
 
 export const getPowerRewardWithdrawSig = async (token: string, rewardId: string) => {

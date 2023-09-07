@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
-// import styles from './Chatbot.module.scss';
 import './Chatbot.scss';
 import { useRef } from 'react';
 import { Character } from '../../models/character';
-import { getAutoQuestion, getChatHistory } from '../../services/ai.service';
+import { bindWallet, getAutoQuestion, getChatHistory } from '../../services/ai.service';
 import { useAuth } from '@clerk/clerk-react';
-import { WS_Endpoint } from '../../models/aime';
-import { Dropdown } from 'antd';
+import { BIND_WALLET_MESSAGE, WS_Endpoint } from '../../models/aime';
+import { Dropdown, notification } from 'antd';
 import BuyPowerDrawer from '../BuyPowerDrawer/BuyPowerDrawer';
-import { useAccount, useDisconnect } from 'wagmi';
+import { useAccount, useDisconnect, useSignMessage } from 'wagmi';
 import { useWeb3Modal } from '@web3modal/react';
 import { useNavigate } from 'react-router-dom';
 import { useAIMeContract } from '../../hooks/useAIMeContract';
 import InfoModal from '../InfoModal/InfoModal';
+import { useUserInfo } from '../../hooks/useUserInfo';
 
 export interface ChatbotProps {
     character: Character;
@@ -39,7 +39,6 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
     const [currentAudio, setCurrentAudio] = useState<any>();
     const audioPlayer = useRef<HTMLAudioElement>(null);
     const msgList = useRef<HTMLDivElement>(null);
-
     const [autoQuestion, setAutoQuestion] = useState<string>();
     const [messages, setMessages] = useState<MessageDisplay[]>([]);
     const [inputValue, setInputValue] = useState<string>();
@@ -48,14 +47,39 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
     const [buyPowerOpen, setBuyPowerOpen] = useState<boolean>(false);
     const navigate = useNavigate();
     const [showTips, setShowTips] = useState<boolean>(false);
-
     const { address, isConnected } = useAccount();
     const { disconnect } = useDisconnect();
     const { open } = useWeb3Modal();
-
     const aimeContract = useAIMeContract();
-
     const [powerBalance, setPowerBalance] = useState<string>();
+    const { userInfo, refresh } = useUserInfo();
+    const { data: signature, error: signMsgError, isLoading: signMsgLoading, signMessage } = useSignMessage();
+
+    useEffect(() => {
+        if (userInfo && address) {
+            if (!userInfo.wallet_address) {
+                signMessage({ message: BIND_WALLET_MESSAGE })
+            }
+        }
+    }, [userInfo, address]);
+
+    const handleBindWallet = async (signature: string) => {
+        const token = await getToken();
+        if (token) {
+            const res = await bindWallet(token, address ?? '', BIND_WALLET_MESSAGE, signature);
+            console.log('bind wallet res', res);
+            refresh();
+            notification.success({
+                message: 'bind wallet success'
+            })
+        }
+    }
+
+    useEffect(() => {
+        if (signature) {
+            handleBindWallet(signature);
+        }
+    }, [signature])
 
     const fetchPowerBalance = async () => {
         const balance = await aimeContract?.sharesBalance(character.contract_address, address);

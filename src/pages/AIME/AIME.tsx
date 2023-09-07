@@ -3,7 +3,7 @@ import './AIME.scss';
 import { useParams } from 'react-router-dom';
 import Chatbot from '../../components/Chatbot/Chatbot';
 import { Character } from '../../models/character';
-import { getCharaters, queryCharacter } from '../../services/ai.service';
+import { getCharaters, getPowerRewardLimit, getUserInfo, queryCharacter } from '../../services/ai.service';
 import { Button, notification } from 'antd';
 import { useAuth, useClerk, useUser } from '@clerk/clerk-react';
 import { useAccount, useSignMessage } from 'wagmi';
@@ -26,6 +26,8 @@ function AIME({ }: AIMEProps) {
     const { address, isConnected } = useAccount();
     const aimeContract = useAIMeContract();
     const [balanceList, setBalanceList] = useState<string[]>([]);
+    const [rewardCountList, setRewardCountList] = useState<number[]>([]);
+    const { getToken } = useAuth();
 
     const fetchPowerBalanceList = async () => {
         console.log('fetching balance list')
@@ -35,6 +37,23 @@ function AIME({ }: AIMEProps) {
         }))
         setBalanceList(list);
     }
+
+    const fetchRewardCount = async () => {
+        const token = await getToken();
+        if (token) {
+            const countList = await Promise.all((characters ?? []).map(async char => {
+                const limit = await getPowerRewardLimit(token, char.character_id);
+                return limit.count;
+            }))
+            setRewardCountList(countList);
+        }
+    }
+
+    useEffect(() => {
+        if (characters) {
+            fetchRewardCount();
+        }
+    }, [characters]);
 
     useEffect(() => {
         if (address && aimeContract && characters) {
@@ -124,7 +143,7 @@ function AIME({ }: AIMEProps) {
                                                     {char.name}
                                                 </div>
                                                 <div className='rewards-count'>
-                                                    Recieved Rewards: 0
+                                                    Recieved Rewards: {rewardCountList[index] ?? 0}
                                                 </div>
                                             </div>
                                             <div className='chat-btn' onClick={() => {
