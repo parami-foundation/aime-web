@@ -1,3 +1,4 @@
+import { notification } from "antd";
 import { PARAMI_AI } from "../models/aime";
 import { Character, ChatHistory } from "../models/character";
 
@@ -5,13 +6,13 @@ import { Character, ChatHistory } from "../models/character";
 const mock = true;
 
 export interface PowerReward {
-  id: string;
-  user_id: string;
-  token_icon: string;
-  token_name: string;
-  token_symbol: string;
-  contract_addr: string;
-  amount: string;
+  address: string;
+  amount: number;
+  character_id: string;
+  created_at: string;
+  id: number;
+  signature: string;
+  user_id: number;
 }
 
 export interface WithdrawSignature {
@@ -128,12 +129,31 @@ export const getPowerRewardLimit = async (token: string, character_id: string) =
   return limit;
 }
 
-export const getPowerRewardWithdrawSig = async (token: string, rewardId: string) => {
-  const resp = await fetch(`${PARAMI_AI}/power_withdraw_sig?id=${rewardId}`, {
+export const getPowerRewardWithdrawSig = async (token: string, rewardId: number) => {
+  const resp = await fetch(`${PARAMI_AI}/transaction_signature?transaction_id=${rewardId}`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
   });
-  const sig = await resp.json() as WithdrawSignature;
-  return sig;
+  if (resp.ok) {
+    return await resp.json() as string;
+  }
+
+  const error = await resp.json() as { detail: string };
+  notification.warning({
+    message: error.detail
+  })
+  return null;
+}
+
+// only for testing
+export const issuePowerReward = async (token: string) => {
+  const resp = await fetch(`${PARAMI_AI}/issue_tokens`, {
+    method: 'post',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  return await resp.json();
 }

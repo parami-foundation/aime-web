@@ -15,7 +15,7 @@ import { useAIMeContract } from '../../hooks/useAIMeContract';
 export interface AIMEProps { }
 
 function AIME({ }: AIMEProps) {
-    let { handle } = useParams() as { handle: string };
+    // let { handle } = useParams() as { handle: string };
     const [character, setCharacter] = useState<Character>();
     const { isSignedIn } = useUser();
     const { signOut, openSignIn } = useClerk();
@@ -87,19 +87,19 @@ function AIME({ }: AIMEProps) {
         })
     }, []);
 
-    useEffect(() => {
-        if (handle) {
-            queryCharacter({ twitter_handle: handle }).then(character => {
-                if (character && character.name) {
-                    setCharacter(character);
-                } else {
-                    // notification.warning({
-                    //     message: 'Character not found',
-                    // })
-                }
-            })
-        }
-    }, [handle])
+    // useEffect(() => {
+    //     if (handle) {
+    //         queryCharacter({ twitter_handle: handle }).then(character => {
+    //             if (character && character.name) {
+    //                 setCharacter(character);
+    //             } else {
+    //                 // notification.warning({
+    //                 //     message: 'Character not found',
+    //                 // })
+    //             }
+    //         })
+    //     }
+    // }, [handle])
 
     return <>
         <div className='aime-container'>
