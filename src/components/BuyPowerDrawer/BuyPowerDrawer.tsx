@@ -9,6 +9,8 @@ import { ethers } from 'ethers';
 import { useBuyPower } from '../../hooks/useBuyPower';
 import InfoModal from '../InfoModal/InfoModal';
 import { LoadingOutlined } from '@ant-design/icons';
+import { useAuth } from '@clerk/clerk-react';
+import { updatePowerBalance } from '../../services/ai.service';
 
 export interface BuyPowerDrawerProps {
     character: Character;
@@ -20,6 +22,7 @@ function BuyPowerDrawer({ character, onClose, onSuccess }: BuyPowerDrawerProps) 
     const { address, isConnected } = useAccount();
     const { open } = useWeb3Modal();
     const [amount, setAmount] = useState<number>(1);
+    const { getToken } = useAuth();
 
     const { price, loading: loadingPrice } = useBuyPowerPrice(character.contract_address, amount);
     const { buyPower, isSuccess, isLoading, error, prepareError } = useBuyPower(character.contract_address, amount);
@@ -35,6 +38,16 @@ function BuyPowerDrawer({ character, onClose, onSuccess }: BuyPowerDrawerProps) 
             console.log('prepareError', prepareError);
         }
     }, [prepareError])
+
+    useEffect(() => {
+        if (isSuccess) {
+            getToken().then(token => {
+                if (token) {
+                    updatePowerBalance(token);
+                }
+            })
+        }
+    }, [isSuccess]);
 
     const changeAmount = (change: number) => {
         const newAmount = amount + change;

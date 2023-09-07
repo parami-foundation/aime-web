@@ -146,6 +146,17 @@ export const getPowerRewardWithdrawSig = async (token: string, rewardId: number)
   return null;
 }
 
+export const updatePowerBalance = async (token: string) => {
+  return null;
+  // const resp = await fetch(`${PARAMI_AI}/update_`, {
+  //   headers: {
+  //     'Authorization': `Bearer ${token}`,
+  //   },
+  // });
+
+  // return await resp.json();
+}
+
 // only for testing
 export const issuePowerReward = async (token: string) => {
   const resp = await fetch(`${PARAMI_AI}/issue_tokens`, {
