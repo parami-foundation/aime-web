@@ -26,7 +26,6 @@ function AIME({ }: AIMEProps) {
     const { address, isConnected } = useAccount();
     const aimeContract = useAIMeContract();
     const [balanceList, setBalanceList] = useState<string[]>([]);
-    // const { data: balanceList, refetch } = usePowerBalanceList((characters ?? []).map(c => c.contract_address), address ?? '');
 
     const fetchPowerBalanceList = async () => {
         console.log('fetching balance list')

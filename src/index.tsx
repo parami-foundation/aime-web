@@ -15,7 +15,7 @@ import { ClerkProvider } from "@clerk/clerk-react";
 import AIME from './pages/AIME/AIME.tsx';
 import Rewards from './pages/Rewards/Rewards.tsx';
 import { infuraProvider } from 'wagmi/providers/infura'
-// import TestPage from './pages/TestPage/TestPage.tsx';
+import TestPage from './pages/TestPage/TestPage.tsx';
 import { publicProvider } from 'wagmi/providers/public'
 
 const chains = [goerli]
@@ -66,7 +66,7 @@ root.render(
             <Route path='/' element={<App />}>
               <Route path='' element={<AIME />} />
               <Route path='rewards' element={<Rewards></Rewards>} />
-              {/* <Route path='test' element={<TestPage></TestPage>} /> */}
+              <Route path='test' element={<TestPage></TestPage>} />
               <Route path='*' element={<Navigate to='/' />} />
             </Route>
           </Routes>

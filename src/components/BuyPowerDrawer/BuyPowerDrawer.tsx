@@ -22,7 +22,19 @@ function BuyPowerDrawer({ character, onClose, onSuccess }: BuyPowerDrawerProps) 
     const [amount, setAmount] = useState<number>(1);
 
     const { price, loading: loadingPrice } = useBuyPowerPrice(character.contract_address, amount);
-    const { buyPower, isSuccess, isLoading } = useBuyPower(character.contract_address, amount);
+    const { buyPower, isSuccess, isLoading, error, prepareError } = useBuyPower(character.contract_address, amount);
+
+    useEffect(() => {
+        if (error) {
+            console.log('error', error);
+        }
+    }, [error])
+
+    useEffect(() => {
+        if (prepareError) {
+            console.log('prepareError', prepareError);
+        }
+    }, [prepareError])
 
     const changeAmount = (change: number) => {
         const newAmount = amount + change;
@@ -79,7 +91,7 @@ function BuyPowerDrawer({ character, onClose, onSuccess }: BuyPowerDrawerProps) 
                     {isConnected && <>
                         <div className='total-price'>
                             <div className='label'>Total:</div>
-                            <div className='value'>{price ? ethers.utils.formatEther(price) : 0} ETH</div>
+                            <div className='value'>{price ?? 0} ETH</div>
                         </div>
                         <div className='buy-btn' onClick={() => {
                             if (!isLoading && !loadingPrice) {

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useAIMeContract } from "./useAIMeContract";
 
 export const useBuyPowerPrice = (aimeAddress: string, amount: number) => {
-  const [price, setPrice] = useState<BigNumber>();
+  const [price, setPrice] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
   const aimeContract = useAIMeContract();
 
@@ -11,7 +11,9 @@ export const useBuyPowerPrice = (aimeAddress: string, amount: number) => {
     if (aimeAddress && amount && aimeContract) {
       setLoading(true);
       aimeContract.getBuyPriceAfterFee(aimeAddress, amount).then((res: BigNumber) => {
-        setPrice(res);
+        const pWei = res.toString();
+        const pEther = ethers.utils.formatEther(pWei);
+        setPrice(pEther);
         setLoading(false);
       })
     }
