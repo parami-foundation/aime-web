@@ -8,7 +8,7 @@ import { Button, notification } from 'antd';
 import { useAuth, useClerk, useUser } from '@clerk/clerk-react';
 import { useAccount, useSignMessage } from 'wagmi';
 import { useWeb3Modal } from '@web3modal/react';
-import { BIND_WALLET_MESSAGE } from '../../models/aime';
+import { BIND_WALLET_MESSAGE, WAITLIST_LINK } from '../../models/aime';
 import { usePowerBalanceList } from '../../hooks/usePowerBalanceList';
 import { useAIMeContract } from '../../hooks/useAIMeContract';
 
@@ -159,6 +159,7 @@ function AIME({ }: AIMEProps) {
 
                         <div className='button-container'>
                             <div className='btn-large' onClick={() => {
+                                window.open(WAITLIST_LINK, '_blank');
                             }}>Mint My Own AIME</div>
                         </div>
 
