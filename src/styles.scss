@@ -8,10 +8,10 @@ $text-light-color: #848484;
 
 $text-gray-color: rgba(255, 255, 255, 0.5);
 
-// @font-face {
-//   font-family: 'Gilroy-Bold';
-//   src: url('./fonts/Gilroy-Bold.ttf') format('truetype');
-// }
+@font-face {
+  font-family: 'SFProText-Heavy';
+  src: url('./fonts/SF-Pro-Text-Heavy.otf') format('opentype');
+}
 
 // @font-face {
 //   font-family: 'Gilroy-Regular';

@@ -19,8 +19,8 @@
       height: 94px;
       border-radius: 34px;
       overflow: hidden;
-      margin-bottom: 20px;
-      
+      margin-bottom: 30px;
+
       img {
         width: 100%;
         height: 100%;
@@ -28,13 +28,7 @@
     }
 
     .title {
-      font-size: 32px;
-      font-weight: bold;
-    }
-
-    .sub-title {
-      font-size: 16px;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
   }
 
@@ -55,6 +49,7 @@
       align-items: center;
       justify-content: center;
       font-size: 16px;
+      font-family: SFProText-Heavy;
     }
   }
 
@@ -66,11 +61,13 @@
     width: 100%;
 
     .header {
-      margin-top: 60px;
+      margin-top: 50px;
       margin-bottom: 20px;
-      font-size: 26px;
-      font-weight: 700;
       width: 70%;
+
+      font-family: SFProText-Heavy;
+      font-size: 26px;
+      color: #000000;
       text-align: center;
     }
 

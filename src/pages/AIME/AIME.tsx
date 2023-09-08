@@ -108,8 +108,12 @@ function AIME({ }: AIMEProps) {
                     <div className='logo'>
                         <img src='/logo.png' alt='' />
                     </div>
-                    <div className='title'>AIME</div>
-                    <div className='sub-title'>aime.parami.io</div>
+                    <div className='title'>
+                        <img src='/images/aime_logo_text.svg' alt=''></img>
+                    </div>
+                    <div className='sub-title'>
+                        <img src='/images/aime_web_url.svg' alt=''></img>
+                    </div>
                 </div>
 
                 <div className='button-container'>
