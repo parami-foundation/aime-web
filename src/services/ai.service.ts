@@ -146,6 +146,15 @@ export const getPowerRewardWithdrawSig = async (token: string, rewardId: number)
   return null;
 }
 
+export const updateNonceStatus = async (token: string, nonce: number) => {
+  const resp = await fetch(`${PARAMI_AI}/check_claim?nonce=${nonce}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  return await resp.json();
+}
+
 export const updatePowerBalance = async (token: string) => {
   return null;
   // const resp = await fetch(`${PARAMI_AI}/update_`, {

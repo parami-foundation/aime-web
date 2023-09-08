@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './Rewards.scss';
 import { useAuth } from '@clerk/clerk-react';
-import { getCharaters, getPowerRewardWithdrawSig, getPowerRewards, issuePowerReward } from '../../services/ai.service';
+import { getCharaters, getPowerRewardWithdrawSig, getPowerRewards, issuePowerReward, updateNonceStatus } from '../../services/ai.service';
 import { useNavigate } from 'react-router-dom';
 import { useAIMeContract } from '../../hooks/useAIMeContract';
 import { useAccount } from 'wagmi';
@@ -231,6 +231,11 @@ function Rewards({ }: RewardsProps) {
                     You have successfully claimed your reward powers.
                 </>}
                 onOk={() => {
+                    getToken().then(token => {
+                        if (token) {
+                            updateNonceStatus(token, claimingRecord?.id ?? 0);
+                        }
+                    })
                     setClaimingRecord(undefined);
                     fetchRewards()
                     setClaimSuccessModal(false);
