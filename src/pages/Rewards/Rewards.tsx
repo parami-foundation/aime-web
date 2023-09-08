@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import './Rewards.scss';
 import { useAuth } from '@clerk/clerk-react';
-import { getCharaters, getPowerRewardLimit, getPowerRewardWithdrawSig, getPowerRewards, issuePowerReward } from '../../services/ai.service';
+import { getCharaters, getPowerRewardWithdrawSig, getPowerRewards, issuePowerReward } from '../../services/ai.service';
 import { useNavigate } from 'react-router-dom';
 import { useAIMeContract } from '../../hooks/useAIMeContract';
 import { useAccount } from 'wagmi';
-import { notification } from 'antd';
 import { useClaimPower } from '../../hooks/useClaimPower';
 import InfoModal from '../../components/InfoModal/InfoModal';
 import { LoadingOutlined } from '@ant-design/icons';
@@ -37,8 +36,24 @@ function Rewards({ }: RewardsProps) {
     const [rewardRecords, setRewardRecords] = useState<RewardRecord[]>();
     const [claimedRecords, setClaimedRecords] = useState<RewardRecord[]>();
     const [claimingRecord, setClaimingRecord] = useState<RewardRecord>();
-    const { claimPower, isLoading, isSuccess } = useClaimPower(claimingRecord?.powerAddress ?? '', claimingRecord?.amount ?? 0, claimingRecord?.id ?? 0, claimingRecord?.signature ?? '')
+    const [claimSuccessModal, setClaimSuccessModal] = useState<boolean>(false);
+    const { claimPower, isLoading, isSuccess, prepareError, error } = useClaimPower(claimingRecord?.powerAddress ?? '', claimingRecord?.amount ?? 0, claimingRecord?.id ?? 0, claimingRecord?.signature ?? '')
     const claimPowerReady = !!claimPower;
+
+    useEffect(() => {
+        if (isSuccess) {
+            setClaimSuccessModal(true);
+        }
+    }, [isSuccess])
+
+    useEffect(() => {
+        if (prepareError) {
+            console.log('prepare error', prepareError);
+        }
+        if (error) {
+            console.log('error', error);
+        }
+    }, [prepareError, error])
 
     useEffect(() => {
         if (claimPowerReady) {
@@ -178,7 +193,7 @@ function Rewards({ }: RewardsProps) {
                 </>}
             </div>
 
-            {/* {process.env.NODE_ENV === 'development' && <>
+            {process.env.NODE_ENV === 'development' && <>
                 <div className='button-container'>
                     <div className='btn-large' onClick={async () => {
                         const token = await getToken();
@@ -187,7 +202,7 @@ function Rewards({ }: RewardsProps) {
                         }
                     }}>Issue Reward</div>
                 </div>
-            </>} */}
+            </>}
         </div>
 
         {isLoading && <>
@@ -208,7 +223,7 @@ function Rewards({ }: RewardsProps) {
             ></InfoModal>
         </>}
 
-        {isSuccess && <>
+        {claimSuccessModal && <>
             <InfoModal
                 image='/images/reward_image.svg'
                 title='Power Claimed'
@@ -218,6 +233,7 @@ function Rewards({ }: RewardsProps) {
                 onOk={() => {
                     setClaimingRecord(undefined);
                     fetchRewards()
+                    setClaimSuccessModal(false);
                 }}
                 okText='OK'
             ></InfoModal>
