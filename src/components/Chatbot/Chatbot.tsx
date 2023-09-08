@@ -55,6 +55,7 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
     const { userInfo, refresh } = useUserInfo();
     const { data: signature, error: signMsgError, isLoading: signMsgLoading, signMessage } = useSignMessage();
     const [rewardModal, setRewardModal] = useState<boolean>(false);
+    const [messageEnd, setMessageEnd] = useState<boolean>(false);
 
     useEffect(() => {
         if (userInfo && address) {
@@ -174,12 +175,13 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
         socket.onmessage = (event) => {
             console.log('Message from server');
             if (typeof event.data === 'string') {
+                setMessageEnd(false);
                 const message = event.data;
-                const aiMessage = JSON.parse(message) as { type: string, data: string, given_token: boolean };
+                const aiMessage = JSON.parse(message) as { type: string, data: string, give_token: boolean };
                 console.log('[aiMessage]', aiMessage);
                 if (aiMessage.type === 'text') {
                     handleAiMessage(aiMessage.data);
-                    if (aiMessage.given_token) {
+                    if (aiMessage.give_token) {
                         setRewardModal(true);
                     }
                 } else if (aiMessage.type === 'score') {
@@ -188,8 +190,7 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                 } else if (aiMessage.type === 'think') {
                     handleThink(aiMessage.data);
                 } else if (aiMessage.type === 'end') {
-                    // handle end
-                    // updateCurrentScore(emoScore);
+                    setMessageEnd(true);
                 }
             } else {  // audio binary data
                 console.log('[binary data]', event.data);
@@ -457,7 +458,7 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
             ></InfoModal>
         </>}
 
-        {rewardModal && <>
+        {rewardModal && messageEnd && <>
             <InfoModal
                 image='/images/reward_image.svg'
                 title={`+1 ${character.name} Power`}
