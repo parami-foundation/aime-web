@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  background: #ffffff;
 
   .header {
     width: 100%;
@@ -20,7 +21,10 @@
     }
 
     .name {
+      font-family: SFProText-Semibold;
       font-size: 16px;
+      color: #000000;
+      text-align: center;
     }
   }
 
@@ -47,6 +51,9 @@
         border-radius: 12px;
         padding: 0 4px;
 
+        font-family: SFProText-Semibold;
+        font-size: 14px;
+
         .power-icon-container {
           height: 16px;
           width: 16px;
@@ -71,9 +78,11 @@
     }
 
     .name {
-      font-size: 20px;
       text-align: center;
       margin: 20px 0;
+      font-family: SFProText-Bold;
+      font-size: 20px;
+      color: #000000;
     }
   }
 
@@ -101,6 +110,7 @@
 
       .message {
         margin-top: 15px;
+        font-family: SFProText-Semibold;
 
         .name {
           font-size: 14px;
@@ -132,6 +142,12 @@
       &:focus {
         outline: none;
       }
+
+      &::placeholder {
+        font-family: SFProText-SemiboldItalic;
+        font-size: 14px;
+        color: #000000;
+      }
     }
 
     .enter-btn {
@@ -161,13 +177,15 @@
   min-width: 130px;
 
   .menu-item {
-    max-width: 130px;
+    max-width: 140px;
     overflow: hidden;
     display: flex;
     align-items: flex-end;
     font-size: 12px;
+    font-family: SFProText-Semibold;
+    color: #000000;
 
-    & + .menu-item {
+    &+.menu-item {
       margin-top: 10px;
     }
 

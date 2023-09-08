@@ -9,8 +9,8 @@
   }
 
   .content {
-    // margin-top: 64px;
     overflow: auto;
+    background-image: linear-gradient(180deg, #FDFDFD 0%, #F3F5F1 80%, #EDF4EF 100%);
   }
 
   .footer {
@@ -85,6 +85,7 @@
       .title {
         font-size: 32px;
       }
+
       .sub-title {
         font-size: 12px;
       }

@@ -6,6 +6,7 @@
 
     .image {
       margin: 20px 0;
+
       img {
         width: 146px;
         height: 146px;
@@ -13,12 +14,17 @@
     }
 
     .title {
+      font-family: SFProText-Heavy;
       font-size: 24px;
-      font-weight: 700;
+      color: #000000;
     }
 
     .description {
+      opacity: 0.8;
+      font-family: SFProText-Medium;
+      color: #000000;
       font-size: 14px;
+      margin: 5px 0;
     }
 
     .ok-btn {
@@ -27,16 +33,20 @@
       margin: 10px 0;
       border-radius: 18px;
       background: #000000;
-      color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-family: SFProText-Heavy;
       font-size: 16px;
-      font-weight: 600;
+      color: #FFFFFF;
+      text-align: center;
     }
 
     .link-btn {
       font-size: 14px;
+      font-family: SFProText-Medium;
+      color: #000000;
+      text-align: center;
     }
   }
 }
