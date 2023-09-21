@@ -1,0 +1,50 @@
+.bid-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #ffffff;
+
+  .header {
+    width: 100%;
+    height: 44px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .return-btn {
+      position: absolute;
+      left: 15px;
+    }
+
+    .name {
+      font-family: SFProText-Semibold;
+      font-size: 16px;
+      color: #000000;
+      text-align: center;
+    }
+  }
+
+  .avatar-section {
+    .avatar-container {
+      position: relative;
+
+      img {
+        border-radius: 30px;
+        width: 327px;
+        height: 327px;
+      }
+    }
+
+    .name {
+      text-align: center;
+      margin: 20px 0;
+      font-family: SFProText-Bold;
+      font-size: 20px;
+      color: #000000;
+    }
+  }
+}

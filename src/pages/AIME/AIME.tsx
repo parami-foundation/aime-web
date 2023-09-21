@@ -30,7 +30,6 @@ function AIME({ }: AIMEProps) {
     const { getToken } = useAuth();
 
     const fetchPowerBalanceList = async () => {
-        console.log('fetching balance list')
         const list = await Promise.all((characters ?? []).map(async char => {
             const balance = await aimeContract?.sharesBalance(char.contract_address, address);
             return balance.toString();
@@ -42,7 +41,10 @@ function AIME({ }: AIMEProps) {
         const token = await getToken();
         if (token) {
             const countList = await Promise.all((characters ?? []).map(async char => {
-                const limit = await getPowerRewardLimit(token, char.character_id);
+                const limit = await getPowerRewardLimit(token, char.character_id).catch(e => {
+                    console.log('getPowerRewardLimit error', e);
+                    return { count: 0 }
+                });
                 return limit.count;
             }))
             setRewardCountList(countList);

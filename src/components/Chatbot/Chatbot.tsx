@@ -341,6 +341,12 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                                         <span>My Rewards</span>
                                     </div>
                                     <div className='menu-item' onClick={() => {
+                                        navigate(`/bid?character_id=${character.character_id}`);
+                                    }}>
+                                        <img src='/images/reward_icon.svg' alt=''></img>
+                                        <span>Bid AIME</span>
+                                    </div>
+                                    <div className='menu-item' onClick={() => {
                                         if (isConnected) {
                                             disconnect();
                                         } else {
@@ -365,7 +371,6 @@ function Chatbot({ character, onReturn }: ChatbotProps) {
                             {!menuOpen && <img className='caret-icon' src='/images/caret_down.svg' alt=''></img>}
                         </div>
                     </Dropdown>
-
                 </div>
 
                 <div className='name'>

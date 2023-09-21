@@ -17,6 +17,7 @@ import Rewards from './pages/Rewards/Rewards.tsx';
 import { infuraProvider } from 'wagmi/providers/infura'
 import TestPage from './pages/TestPage/TestPage.tsx';
 import { publicProvider } from 'wagmi/providers/public'
+import Bid from './pages/Bid/Bid.tsx';
 
 const chains = [goerli]
 const projectId = '2e586b0807500a0da3a4f7b66418295e';
@@ -66,6 +67,7 @@ root.render(
             <Route path='/' element={<App />}>
               <Route path='' element={<AIME />} />
               <Route path='rewards' element={<Rewards></Rewards>} />
+              <Route path='bid' element={<Bid></Bid>} />
               <Route path='test' element={<TestPage></TestPage>} />
               <Route path='*' element={<Navigate to='/' />} />
             </Route>
