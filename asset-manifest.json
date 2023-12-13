@@ -1,31 +1,10 @@
 {
   "files": {
-    "main.css": "/static/css/main.451c5e9e.css",
-    "main.js": "/static/js/main.fe1f4b10.js",
-    "static/js/208.d43fecfd.chunk.js": "/static/js/208.d43fecfd.chunk.js",
-    "static/js/409.b7d02026.chunk.js": "/static/js/409.b7d02026.chunk.js",
-    "static/js/631.3a976312.chunk.js": "/static/js/631.3a976312.chunk.js",
-    "static/js/774.962cd696.chunk.js": "/static/js/774.962cd696.chunk.js",
-    "static/js/315.f5f4dc34.chunk.js": "/static/js/315.f5f4dc34.chunk.js",
-    "static/js/771.712d4190.chunk.js": "/static/js/771.712d4190.chunk.js",
-    "static/media/SF-Pro-Text-Semibold.otf": "/static/media/SF-Pro-Text-Semibold.f0491345865389125315.otf",
-    "static/media/SF-Pro-Text-Heavy.otf": "/static/media/SF-Pro-Text-Heavy.d81b3ae2aceb5aab3f61.otf",
-    "static/media/SF-Pro-Text-Medium.otf": "/static/media/SF-Pro-Text-Medium.5192999855747e9b3eec.otf",
-    "static/media/SF-Pro-Text-Bold.otf": "/static/media/SF-Pro-Text-Bold.95ec6607dc817cd27366.otf",
-    "static/media/SF-Pro-Text-SemiboldItalic.otf": "/static/media/SF-Pro-Text-SemiboldItalic.155a2d97b12af6f8f912.otf",
-    "static/media/SF-Pro-Text-Regular.otf": "/static/media/SF-Pro-Text-Regular.07207c01961c82f16c3b.otf",
+    "main.js": "/static/js/main.fb4b859f.js",
     "index.html": "/index.html",
-    "main.451c5e9e.css.map": "/static/css/main.451c5e9e.css.map",
-    "main.fe1f4b10.js.map": "/static/js/main.fe1f4b10.js.map",
-    "208.d43fecfd.chunk.js.map": "/static/js/208.d43fecfd.chunk.js.map",
-    "409.b7d02026.chunk.js.map": "/static/js/409.b7d02026.chunk.js.map",
-    "631.3a976312.chunk.js.map": "/static/js/631.3a976312.chunk.js.map",
-    "774.962cd696.chunk.js.map": "/static/js/774.962cd696.chunk.js.map",
-    "315.f5f4dc34.chunk.js.map": "/static/js/315.f5f4dc34.chunk.js.map",
-    "771.712d4190.chunk.js.map": "/static/js/771.712d4190.chunk.js.map"
+    "main.fb4b859f.js.map": "/static/js/main.fb4b859f.js.map"
   },
   "entrypoints": [
-    "static/css/main.451c5e9e.css",
-    "static/js/main.fe1f4b10.js"
+    "static/js/main.fb4b859f.js"
   ]
 }
