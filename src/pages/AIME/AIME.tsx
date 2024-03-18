@@ -1,191 +1,114 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import './AIME.scss';
-import { useParams } from 'react-router-dom';
-import Chatbot from '../../components/Chatbot/Chatbot';
-import { Character } from '../../models/character';
-import { getCharaters, getPowerRewardLimit, getUserInfo, queryCharacter } from '../../services/ai.service';
+import { useAccount } from 'wagmi'
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Button, notification } from 'antd';
-import { useAuth, useClerk, useUser } from '@clerk/clerk-react';
-import { useAccount, useSignMessage } from 'wagmi';
-import { useWeb3Modal } from '@web3modal/react';
-import { BIND_WALLET_MESSAGE, WAITLIST_LINK } from '../../models/aime';
-import { usePowerBalanceList } from '../../hooks/usePowerBalanceList';
-import { useAIMeContract } from '../../hooks/useAIMeContract';
+import { useNFT } from '../../hooks/useNFT';
+import { useLocation } from 'react-router-dom';
+import { useSellNFT } from '../../hooks/useSellNFT';
+import { useBuyNFT } from '../../hooks/useBuyNFT';
+import { useAIMePower } from '../../hooks/useAIMePower';
 
 export interface AIMEProps { }
 
 function AIME({ }: AIMEProps) {
-    // let { handle } = useParams() as { handle: string };
-    const [character, setCharacter] = useState<Character>();
-    const { isSignedIn } = useUser();
-    const { signOut, openSignIn } = useClerk();
-    const [characters, setCharacters] = useState<Character[]>();
-    const [requestUserSig, setRequestUserSig] = useState<boolean>(false);
-    const { open } = useWeb3Modal();
-    const { data: signature, error: signMsgError, isLoading: signMsgLoading, signMessage } = useSignMessage();
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const contractAddress = queryParams.get('address') as `0x${string}`;
+    const tokenIdFromParam = queryParams.get('tokenId') as string;
+    const [aimeAddress, setAimeAddress] = useState<`0x${string}`>(contractAddress)
+    const [tokenId, setTokenId] = useState<string>(tokenIdFromParam)
+
+    const { sellNFT, isPending: isSellPending, isSuccess: isSellSuccess } = useSellNFT(aimeAddress, tokenId);
+    const { buyNFT, isPending: isBuyPending, isSuccess: isBuySuccess } = useBuyNFT(aimeAddress, tokenId);
+
+    const { tokenUri, tokenOwner, nftPrice, nftPriceFormated } = useNFT(aimeAddress, tokenId);
     const { address, isConnected } = useAccount();
-    const aimeContract = useAIMeContract();
-    const [balanceList, setBalanceList] = useState<string[]>([]);
-    const [rewardCountList, setRewardCountList] = useState<number[]>([]);
-    const { getToken } = useAuth();
+    const { powerBalance, approvePower, isPending: isApprovePending, isSuccess: isApproveSuccess } = useAIMePower(aimeAddress, address)
 
-    const fetchPowerBalanceList = async () => {
-        console.log('fetching balance list')
-        const list = await Promise.all((characters ?? []).map(async char => {
-            const balance = await aimeContract?.sharesBalance(char.contract_address, address);
-            return balance.toString();
-        }))
-        setBalanceList(list);
-    }
-
-    const fetchRewardCount = async () => {
-        const token = await getToken();
-        if (token) {
-            const countList = await Promise.all((characters ?? []).map(async char => {
-                const limit = await getPowerRewardLimit(token, char.character_id);
-                return limit.count;
-            }))
-            setRewardCountList(countList);
-        }
+    const refresh = () => {
+        setTimeout(() => {
+            window.location.reload();
+        }, 500)
     }
 
     useEffect(() => {
-        if (characters) {
-            fetchRewardCount();
-        }
-    }, [characters]);
-
-    useEffect(() => {
-        if (address && aimeContract && characters) {
-            fetchPowerBalanceList();
-        }
-    }, [address, aimeContract, characters])
-
-    useEffect(() => {
-        if (requestUserSig) {
-            if (!isConnected) {
-                open().catch(e => console.log(e));
-            } else {
-                signMessage({ message: BIND_WALLET_MESSAGE })
-            }
-        }
-    }, [requestUserSig, isConnected])
-
-    useEffect(() => {
-        if (signature) {
-            console.log('got sig from user', signature);
+        if (isSellSuccess) {
             notification.success({
-                message: 'bind wallet success'
-            })
-            setRequestUserSig(false);
+                message: 'Successfully Sold NFT',
+            });
+            refresh();
         }
-    }, [signature])
+    }, [isSellSuccess])
+
 
     useEffect(() => {
-        getCharaters().then(characters => {
-            setCharacters(characters)
-        })
-    }, []);
+        if (isApproveSuccess && !isBuyPending && !isBuySuccess && buyNFT) {
+            buyNFT()
+        }
+    }, [isApproveSuccess, isBuyPending, buyNFT])
 
-    // useEffect(() => {
-    //     if (handle) {
-    //         queryCharacter({ twitter_handle: handle }).then(character => {
-    //             if (character && character.name) {
-    //                 setCharacter(character);
-    //             } else {
-    //                 // notification.warning({
-    //                 //     message: 'Character not found',
-    //                 // })
-    //             }
-    //         })
-    //     }
-    // }, [handle])
+    useEffect(() => {
+        if (isBuySuccess) {
+            notification.success({
+                message: 'Successfully Bought NFT',
+            });
+            refresh();
+        }
+    }, [isBuySuccess])
 
     return <>
         <div className='aime-container'>
-            {!isSignedIn && <>
-                <div className='logo-container'>
-                    <div className='logo'>
-                        <img src='/logo.png' alt='' />
-                    </div>
-                    <div className='title'>
-                        <img src='/images/aime_logo_text.svg' alt=''></img>
-                    </div>
-                    <div className='sub-title'>
-                        <img src='/images/aime_web_url.svg' alt=''></img>
-                    </div>
-                </div>
-
-                <div className='button-container'>
-                    <div className='btn-large' onClick={() => {
-                        openSignIn()
-                    }}>Login</div>
+            {!!tokenUri?.image && <>
+                <div className='nft-container'>
+                    <img src={tokenUri?.image} alt='nft'></img>
                 </div>
             </>}
 
-            {isSignedIn && <>
-                {!character && <>
-                    <div className='select-character-container'>
-                        <div className='header'>CHOOSE ONE OF THEM TO TALK</div>
+            <div className='btn-container'>
+                {isConnected && <>
+                    {tokenOwner && address && tokenOwner === address && <>
+                        <Button type='primary' loading={isSellPending} onClick={() => {
+                            sellNFT()
+                        }}>Sell your NFT for {nftPriceFormated} power</Button>
+                    </>}
 
-                        <div className='characters-container'>
-                            {characters && characters.length > 0 && <>
-                                {characters.map((char, index) => {
-                                    return <>
-                                        <div className='character-card'>
-                                            <div className='power-balance'>
-                                                <div className='power-icon-container'>
-                                                    <img src='/images/power_icon.svg' alt=''></img>
-                                                </div>
-                                                {(balanceList ?? [])[index] ?? 0} Power
-                                            </div>
-                                            <div className='avatar'>
-                                                <img src={char.avatar} alt='' />
-                                            </div>
-                                            <div className='name-container'>
-                                                <div className='name'>
-                                                    {char.name}
-                                                </div>
-                                                <div className='rewards-count'>
-                                                    Recieved Rewards: {rewardCountList[index] ?? 0}
-                                                </div>
-                                            </div>
-                                            <div className='chat-btn' onClick={() => {
-                                                setCharacter(char)
-                                            }}>
-                                                CHAT
-                                            </div>
-                                        </div>
-                                    </>
-                                })}
-                            </>}
-                        </div>
-
-                        <div className='button-container'>
-                            <div className='btn-large' onClick={() => {
-                                window.open(WAITLIST_LINK, '_blank');
-                            }}>Mint My Own AIME</div>
-                        </div>
-
-                        {process.env.NODE_ENV === 'development' && <>
-                            <div className='button-container'>
-                                <div className='btn-large' onClick={() => {
-                                    signOut();
-                                }}>Logout</div>
-                            </div>
+                    {tokenOwner && address && tokenOwner !== address && <>
+                        {nftPrice && powerBalance && powerBalance >= nftPrice && <>
+                            <Button type='primary' loading={isBuyPending || isApprovePending} onClick={() => {
+                                approvePower(nftPrice)
+                            }}>Buy this NFT for {nftPriceFormated} power</Button>
                         </>}
-                    </div>
+
+                        {(!powerBalance || powerBalance < nftPrice) && <>
+                            <Button type='primary' disabled>Insufficient power to buy</Button>
+                        </>}
+                    </>}
                 </>}
 
-                {character && <>
-                    <div className='chat-container'>
-                        <Chatbot character={character} onReturn={() => {
-                            setCharacter(undefined);
-                            fetchPowerBalanceList();
-                        }}></Chatbot>
-                    </div>
+                {!isConnected && <>
+                    <ConnectButton.Custom>
+                        {({
+                            openConnectModal,
+                        }) => {
+                            return (
+                                <Button
+                                    block
+                                    type="primary"
+                                    size="large"
+                                    onClick={() => openConnectModal()}
+                                >
+                                    <div >
+                                        <div>
+                                            Connect Wallet
+                                        </div>
+                                    </div>
+                                </Button>
+                            );
+                        }}
+                    </ConnectButton.Custom>
                 </>}
-            </>}
+            </div>
         </div>
     </>;
 };
