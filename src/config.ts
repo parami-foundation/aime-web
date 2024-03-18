@@ -1,5 +1,5 @@
 import { http, createConfig } from 'wagmi'
-import { sepolia } from 'wagmi/chains'
+import { arbitrumSepolia } from 'wagmi/chains'
 import {
   getDefaultConfig,
   RainbowKitProvider,
@@ -8,7 +8,7 @@ import {
 export const config = getDefaultConfig({
   appName: 'AIME NFT',
   projectId: '75c7ae62e54cdc7807a8b3e7d67e5b8c',// aime-nft
-  chains: [sepolia],
+  chains: [arbitrumSepolia],
 });
 
 // export const config = createConfig({

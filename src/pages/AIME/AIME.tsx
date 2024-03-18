@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import './AIME.scss';
-import { useAccount } from 'wagmi'
+import { useAccount, useSwitchChain, useChainId } from 'wagmi'
+import { arbitrumSepolia } from 'wagmi/chains'
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Button, notification } from 'antd';
 import { useNFT } from '../../hooks/useNFT';
@@ -13,6 +14,8 @@ export interface AIMEProps { }
 
 function AIME({ }: AIMEProps) {
     const location = useLocation();
+    const chainId = useChainId();
+    const { switchChain } = useSwitchChain();
     const queryParams = new URLSearchParams(location.search);
     const contractAddress = queryParams.get('address') as `0x${string}`;
     const tokenIdFromParam = queryParams.get('tokenId') as string;
@@ -67,21 +70,28 @@ function AIME({ }: AIMEProps) {
 
             <div className='btn-container'>
                 {isConnected && <>
-                    {tokenOwner && address && tokenOwner.toLowerCase() === address.toLowerCase() && <>
-                        <Button type='primary' loading={isSellPending} onClick={() => {
-                            sellNFT()
-                        }}>Sell your NFT for {nftPriceFormated} power</Button>
+                    {chainId !== arbitrumSepolia.id && <>
+                        <Button type='primary' onClick={() => {
+                            switchChain({ chainId: arbitrumSepolia.id })
+                        }}>Change Network</Button>
                     </>}
-
-                    {tokenOwner && address && tokenOwner.toLowerCase() !== address.toLowerCase() && <>
-                        {nftPrice && powerBalance && powerBalance >= nftPrice && <>
-                            <Button type='primary' loading={isBuyPending || isApprovePending} onClick={() => {
-                                approvePower(nftPrice)
-                            }}>Buy this NFT for {nftPriceFormated} power</Button>
+                    {chainId === arbitrumSepolia.id && <>
+                        {tokenOwner && address && tokenOwner.toLowerCase() === address.toLowerCase() && <>
+                            <Button type='primary' loading={isSellPending} onClick={() => {
+                                sellNFT()
+                            }}>Sell your NFT for {nftPriceFormated} power</Button>
                         </>}
 
-                        {(!powerBalance || powerBalance < nftPrice) && <>
-                            <Button type='primary' disabled>Insufficient power to buy</Button>
+                        {tokenOwner && address && tokenOwner.toLowerCase() !== address.toLowerCase() && <>
+                            {nftPrice && powerBalance && powerBalance >= nftPrice && <>
+                                <Button type='primary' loading={isBuyPending || isApprovePending} onClick={() => {
+                                    approvePower(nftPrice)
+                                }}>Buy this NFT for {nftPriceFormated} power</Button>
+                            </>}
+
+                            {(!powerBalance || powerBalance < nftPrice) && <>
+                                <Button type='primary' disabled>Insufficient power to buy</Button>
+                            </>}
                         </>}
                     </>}
                 </>}
