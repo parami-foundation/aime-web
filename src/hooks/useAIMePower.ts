@@ -32,6 +32,7 @@ export const useAIMePower = (aimeAddress: `0x${string}`, userAddress?: `0x${stri
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
+      confirmations: 2,
       hash,
     })
 

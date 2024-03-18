@@ -67,13 +67,13 @@ function AIME({ }: AIMEProps) {
 
             <div className='btn-container'>
                 {isConnected && <>
-                    {tokenOwner && address && tokenOwner === address && <>
+                    {tokenOwner && address && tokenOwner.toLowerCase() === address.toLowerCase() && <>
                         <Button type='primary' loading={isSellPending} onClick={() => {
                             sellNFT()
                         }}>Sell your NFT for {nftPriceFormated} power</Button>
                     </>}
 
-                    {tokenOwner && address && tokenOwner !== address && <>
+                    {tokenOwner && address && tokenOwner.toLowerCase() !== address.toLowerCase() && <>
                         {nftPrice && powerBalance && powerBalance >= nftPrice && <>
                             <Button type='primary' loading={isBuyPending || isApprovePending} onClick={() => {
                                 approvePower(nftPrice)

@@ -8,6 +8,7 @@ export const useSellNFT = (address: `0x${string}`, tokenId: string) => {
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
+      confirmations: 2,
       hash,
     })
 
