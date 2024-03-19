@@ -28,14 +28,24 @@ export const useNFT = (address: `0x${string}`, tokenId: string) => {
 
   if (!address || !tokenId || !tokenUriRes.data) return { tokenUri: null }
 
-  const tokenUri = parseBase64Json(tokenUriRes.data as string)
+  const nftOwner = tokenOwnerRes.data as `0x${string}`;
+  const tokenUri = parseBase64Json(tokenUriRes.data as string);
   const tokenContents = tokenContentRes.data;
-  const nftPrice = (tokenContents && tokenContents[tokenContents.length - 1]) as bigint;
+  const nftOriginalPrice = (tokenContents && tokenContents[tokenContents.length - 2]) as bigint;
+  const nftCurrentPrice = (tokenContents && tokenContents[tokenContents.length - 1]) as bigint;
+
+  let nftPrice = nftOriginalPrice;
+  if (nftOwner.toLowerCase() !== address) {
+    nftPrice = nftCurrentPrice * BigInt(12) / BigInt(10);
+  }
+  
   return {
     tokenUri: tokenUri,
     tokenOwner: tokenOwnerRes.data as string,
     tokenContents: tokenContentRes.data,
-    nftPrice: nftPrice,
-    nftPriceFormated: `${Number(formatEther(nftPrice)).toFixed(2)}`,
+    nftSellPrice: nftOriginalPrice,
+    nftSellPriceFormated: `${Number(formatEther(nftOriginalPrice)).toFixed(2)}`,
+    nftBuyPrice: nftPrice,
+    nftBuyPriceFormated: `${Number(formatEther(nftPrice)).toFixed(2)}`,
   };
 }

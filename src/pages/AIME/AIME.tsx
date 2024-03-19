@@ -3,7 +3,7 @@ import './AIME.scss';
 import { useAccount, useSwitchChain, useChainId } from 'wagmi'
 import { arbitrumSepolia } from 'wagmi/chains'
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { Button, notification } from 'antd';
+import { Button, notification, Image, Skeleton } from 'antd';
 import { useNFT } from '../../hooks/useNFT';
 import { useLocation } from 'react-router-dom';
 import { useSellNFT } from '../../hooks/useSellNFT';
@@ -17,15 +17,13 @@ function AIME({ }: AIMEProps) {
     const chainId = useChainId();
     const { switchChain } = useSwitchChain();
     const queryParams = new URLSearchParams(location.search);
-    const contractAddress = queryParams.get('address') as `0x${string}`;
-    const tokenIdFromParam = queryParams.get('tokenId') as string;
-    const [aimeAddress, setAimeAddress] = useState<`0x${string}`>(contractAddress)
-    const [tokenId, setTokenId] = useState<string>(tokenIdFromParam)
+    const aimeAddress = queryParams.get('address') as `0x${string}`;
+    const tokenId = queryParams.get('tokenId') as string;
 
     const { sellNFT, isPending: isSellPending, isSuccess: isSellSuccess } = useSellNFT(aimeAddress, tokenId);
     const { buyNFT, isPending: isBuyPending, isSuccess: isBuySuccess } = useBuyNFT(aimeAddress, tokenId);
 
-    const { tokenUri, tokenOwner, nftPrice, nftPriceFormated } = useNFT(aimeAddress, tokenId);
+    const { tokenUri, tokenOwner, nftBuyPrice, nftBuyPriceFormated, nftSellPriceFormated } = useNFT(aimeAddress, tokenId);
     const { address, isConnected } = useAccount();
     const { powerBalance, approvePower, isPending: isApprovePending, isSuccess: isApproveSuccess } = useAIMePower(aimeAddress, address)
 
@@ -64,60 +62,68 @@ function AIME({ }: AIMEProps) {
         <div className='aime-container'>
             {!!tokenUri?.image && <>
                 <div className='nft-container'>
-                    <img src={tokenUri?.image} alt='nft'></img>
+                    <Image src={tokenUri?.image} preview={false} placeholder={
+                        <Skeleton.Image active={true} />
+                    }></Image>
                 </div>
             </>}
 
             <div className='btn-container'>
-                {isConnected && <>
-                    {chainId !== arbitrumSepolia.id && <>
-                        <Button type='primary' onClick={() => {
-                            switchChain({ chainId: arbitrumSepolia.id })
-                        }}>Change Network</Button>
-                    </>}
-                    {chainId === arbitrumSepolia.id && <>
-                        {tokenOwner && address && tokenOwner.toLowerCase() === address.toLowerCase() && <>
-                            <Button type='primary' loading={isSellPending} onClick={() => {
-                                sellNFT()
-                            }}>Sell your NFT for {nftPriceFormated} power</Button>
-                        </>}
-
-                        {tokenOwner && address && tokenOwner.toLowerCase() !== address.toLowerCase() && <>
-                            {nftPrice && powerBalance && powerBalance >= nftPrice && <>
-                                <Button type='primary' loading={isBuyPending || isApprovePending} onClick={() => {
-                                    approvePower(nftPrice)
-                                }}>Buy this NFT for {nftPriceFormated} power</Button>
-                            </>}
-
-                            {(!powerBalance || powerBalance < nftPrice) && <>
-                                <Button type='primary' disabled>Insufficient power to buy</Button>
-                            </>}
-                        </>}
-                    </>}
+                {tokenId === '0' && <>
+                    <span>Cannot trade the first NFT</span>
                 </>}
+                {tokenId !== '0' && <>
+                    {isConnected && <>
+                        {chainId !== arbitrumSepolia.id && <>
+                            <Button type='primary' onClick={() => {
+                                switchChain({ chainId: arbitrumSepolia.id })
+                            }}>Change Network</Button>
+                        </>}
+                        {chainId === arbitrumSepolia.id && <>
+                            {tokenOwner && address && tokenOwner.toLowerCase() === address.toLowerCase() && <>
+                                <Button type='primary' loading={isSellPending} onClick={() => {
+                                    sellNFT()
+                                }}>Sell your NFT for {nftSellPriceFormated} power</Button>
+                            </>}
 
-                {!isConnected && <>
-                    <ConnectButton.Custom>
-                        {({
-                            openConnectModal,
-                        }) => {
-                            return (
-                                <Button
-                                    block
-                                    type="primary"
-                                    size="large"
-                                    onClick={() => openConnectModal()}
-                                >
-                                    <div >
-                                        <div>
-                                            Connect Wallet
+                            {tokenOwner && address && tokenOwner.toLowerCase() !== address.toLowerCase() && <>
+                                {nftBuyPrice && powerBalance && powerBalance >= nftBuyPrice && <>
+                                    <Button type='primary' loading={isBuyPending || isApprovePending} onClick={() => {
+                                        approvePower(nftBuyPrice)
+                                    }}>Buy this NFT for {nftBuyPriceFormated} power</Button>
+                                </>}
+
+                                {(!powerBalance || powerBalance < nftBuyPrice) && <>
+                                    <Button type='primary' disabled>Insufficient power to buy</Button>
+                                </>}
+                            </>}
+                        </>}
+                    </>}
+
+                    {!isConnected && <>
+                        <ConnectButton.Custom>
+                            {({
+                                openConnectModal,
+                            }) => {
+                                return (
+                                    <Button
+                                        block
+                                        type="primary"
+                                        size="large"
+                                        onClick={() => openConnectModal()}
+                                    >
+                                        <div >
+                                            <div>
+                                                Connect Wallet
+                                            </div>
                                         </div>
-                                    </div>
-                                </Button>
-                            );
-                        }}
-                    </ConnectButton.Custom>
+                                    </Button>
+                                );
+                            }}
+                        </ConnectButton.Custom>
+                    </>}
                 </>}
+
             </div>
         </div>
     </>;
